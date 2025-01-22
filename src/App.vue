@@ -27,6 +27,12 @@
     <a>About</a>
     -->
   </div>
+  <div class="totalDiv">
+    <div class="sidebar">
+      <ul class="sidemenu">
+        <li v-for="(li, idx) in lis" :key="idx" @click="showAlert(idx)">{{ li }}</li>
+      </ul>
+    </div>
 
   <!-- {{ dataname }} 으로 값을 받아옴 -->
   <!-- 데이터바인딩 하는 이유
@@ -40,13 +46,13 @@
       ++ HTML 속성도 바인딩 가능 ++
       ++ :속성 = "바인딩 변수명" ++
   -->
-  <div class="room-container">
-    <div class="room" v-for="(oneroom, idx) in onerooms" :key="idx">
-      <img :src="oneroom.image" class="room-img">
-      <h4 @click="modalOpen(idx)">{{ oneroom.title }}</h4>  
-      <p>{{ oneroom.price }} 원</p>
+    <div class="room-container">
+      <div class="room" v-for="(oneroom, idx) in onerooms" :key="idx">
+        <img :src="oneroom.image" class="room-img">
+        <h4 @click="modalOpen(idx)">{{ oneroom.title }}</h4>  
+        <p>{{ oneroom.price }} 원</p>
+      </div>
     </div>
-  </div>
   
 
   <!-- 
@@ -76,6 +82,7 @@
     <p>70 만원</p>
     <button @click="reports[2]+=1">허위 매물 신고</button> <span>신고 수 : {{ reports[2] }}</span>
   </div> -->
+  </div>
  
 </template>
 
@@ -96,6 +103,7 @@ export default {
       menus : ['Home', 'Shop', 'About'],
       homes : ['역삼동 원룸', '천호동 원룸', '마포구 원룸'],
       reports : [0, 0, 0],
+      lis : ['이름별 정렬', '가격별 정렬', '50만원 이상'],
       products : [
         {name : '역삼동 원룸', price : 80},
         {name : '천호동 원룸', price : 70},
@@ -126,6 +134,9 @@ export default {
       this.modalIsOpen = false;
       this.modalTitle = "";
       this.modalContent = "";
+    },
+    showAlert(idx) {
+      alert(`Vuejs 알림창 idx : ${idx}`);
     },
   },
   components: {
@@ -185,9 +196,31 @@ div {
   gap: 20px; /* 컬럼 간 간격 */
 }
 
+.totalDiv {
+  display: grid;
+  grid-template-columns: 1fr 6fr;
+  gap: 10px;
+}
+
+.sidebar {
+  margin-top: 40px;
+}
+
+.sidebar .sidemenu {
+  padding-inline-start: 20px;
+  list-style-type: none;
+}
+
+.sidebar .sidemenu li {
+  padding: 20px;
+  border-radius: 5px;
+  border: solid 1px grey;
+}
+
 .room {
   flex: 1;
   padding: 20px;
   text-align: center;
 }
+
 </style>
