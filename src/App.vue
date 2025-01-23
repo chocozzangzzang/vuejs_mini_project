@@ -29,38 +29,10 @@
       ++ HTML 속성도 바인딩 가능 ++
       ++ :속성 = "바인딩 변수명" ++
   -->
-    <div v-if="!priceFilter && orderbyPrice == 0 && !orderbyName" class="room-container">
-      <div class="room" v-for="(oneroom, idx) in onerooms" :key="idx">
-        <img :src="oneroom.image" class="room-img">
-        <h4 @click="modalOpen(idx)">{{ oneroom.title }}</h4>  
-        <p>{{ oneroom.price }} 원</p>
-      </div>
-    </div>
-
-    <div v-if="orderbyName" class="room-container">
-      <div class="room" v-for="(oneroom, idx) in orderedByName" :key="idx">
-        <img :src="oneroom.image" class="room-img">
-        <h4 @click="modalOpen(idx)">{{ oneroom.title }}</h4>  
-        <p>{{ oneroom.price }} 원</p>
-      </div>
-    </div>
-
-    <div v-if="orderbyPrice != 0" class="room-container">
-      <div class="room" v-for="(oneroom, idx) in orderedByPrice" :key="idx">
-        <img :src="oneroom.image" class="room-img">
-        <h4 @click="modalOpen(idx)">{{ oneroom.title }}</h4>  
-        <p>{{ oneroom.price }} 원</p>
-      </div>
-    </div>
-
-    <div v-if="priceFilter" class="room-container">
-      <div class="room" v-for="(oneroom, idx) in filteredByPrice" :key="idx">
-        <img :src="oneroom.image" class="room-img">
-        <h4 @click="modalOpen(idx)">{{ oneroom.title }}</h4>  
-        <p>{{ oneroom.price }} 원</p>
-      </div>
-    </div>
-  
+    <room-info @oneroomInfo="callModal" 
+      :orderByTitle="orderByTitle"
+      :orderByPrice="orderByPrice"
+      :filterByPrice="filterByPrice"/>  
 
   <!-- 
     이벤트 핸들러 : HTML 클릭 시 코드를 실행함
@@ -70,25 +42,6 @@
     click : 클릭 시
     mouseover : 마우스를 갖다대는 경우 
   -->
-
-  <!-- <div>
-    <img src="./assets/room0.jpg" class="room-img">
-    <h4 @click="modalOpen">{{ homes[0] }}</h4>
-    <p>50 만원</p>
-    <button @click="reports[0]+=1">허위 매물 신고</button> <span>신고 수 : {{ reports[0] }}</span>
-  </div>
-  <div>
-    <img src="./assets/room1.jpg" class="room-img">
-    <h4>{{ homes[1] }}</h4>
-    <p>60 만원</p>
-    <button @click="reports[1]+=1">허위 매물 신고</button> <span>신고 수 : {{ reports[1] }}</span>
-  </div>
-  <div>
-    <img src="./assets/room2.jpg" class="room-img">
-    <h4>{{ homes[2] }}</h4>
-    <p>70 만원</p>
-    <button @click="reports[2]+=1">허위 매물 신고</button> <span>신고 수 : {{ reports[2] }}</span>
-  </div> -->
   </div>
  
 </template>
@@ -97,7 +50,7 @@
 import AppHeader from "./components/layouts/AppHeader.vue";
 import ModalLayout from "./components/layouts/ModalLayout.vue";
 import SideBar from "./components/layouts/SideBar.vue";
-import roomdata from "./data/rooms.js";
+import RoomInfo from "./components/RoomInfo.vue";
 
 // DataBinding //
 export default {
@@ -106,14 +59,6 @@ export default {
     // return { } 내에 데이터를 모두 보관 //
     // object 형식으로 나타냄 //
     return {
-      onerooms : roomdata,
-      homes : ['역삼동 원룸', '천호동 원룸', '마포구 원룸'],
-      reports : [0, 0, 0],
-      products : [
-        {name : '역삼동 원룸', price : 80},
-        {name : '천호동 원룸', price : 70},
-        {name : '마포구 원룸', price : 95},
-      ],
       /* 
         1. UI의 현재 상태를 데이터로 저장해둠
         2. 데이터에 따라 UI가 어떻게 보일지 작성
@@ -121,9 +66,9 @@ export default {
       modalIsOpen : false,
       modalTitle : "",
       modalContent : "",
-      priceFilter : false,
-      orderbyName : false,
-      orderbyPrice : 0,
+      orderByTitle : false,
+      orderByPrice : 0,
+      filterByPrice : false,
     }
   },
   // Vue에서의 함수 -> methods : {}
@@ -151,19 +96,34 @@ export default {
       this.modalContent = "";
     },
     sorting(state) {
-      if(state.sortByN) {this.orderbyName = !this.orderbyName; this.orderbyPrice = false; this.priceFilter = false;}
+      if(state.sortByN) {
+        this.orderByTitle = !this.orderByTitle; 
+        this.orderbyPrice = 0;
+        this.filterByPrice = false;}
       else if(state.sortByP) {
-        this.orderbyName = false; this.priceFilter = false;
-        this.orderbyPrice = (this.orderbyPrice + 1) % 3;
-      }
-      else if(state.filterByP) {this.orderbyName = false; this.orderbyPrice = false; this.priceFilter = !this.priceFilter;}
-      else {this.orderbyName = false; this.orderbyPrice = false; this.priceFilter = false;}
+        this.orderByTitle = false; 
+        this.orderByPrice = (this.orderByPrice + 1) % 3;
+        this.filterByPrice = false;}
+      else if(state.filterByP) {
+        this.orderbyName = false; 
+        this.orderbyPrice = 0; 
+        this.filterByPrice = !this.filterByPrice;}
+      else {
+        this.orderbyName = false; 
+        this.orderbyPrice = 0; 
+        this.filterByPrice = false;}
+    },
+    callModal(data) {
+        this.modalIsOpen = true;
+        this.modalTitle = data.title;
+        this.modalContent = data.content;
     },
   },
   components: {
     AppHeader,
     ModalLayout,
     SideBar,
+    RoomInfo,
   },
   computed: {
     filteredByPrice() {
@@ -191,49 +151,16 @@ export default {
   color: #2c3e50;
 }
 
-
-.room-img {
-  width: 100%;
-  margin-top: 40px;
-}
-
 /* 모달 창 디자인 */
 
 body {
   margin : 0
 }
 
-.room-container {
-  display: grid;
-  grid-template-columns: 1fr 1fr; /* 두 개의 동일한 너비 컬럼 */
-  gap: 20px; /* 컬럼 간 간격 */
-}
-
 .totalDiv {
   display: grid;
   grid-template-columns: 1fr 6fr;
   gap: 10px;
-}
-
-.sidebar {
-  margin-top: 40px;
-}
-
-.sidebar .sidemenu {
-  padding-inline-start: 20px;
-  list-style-type: none;
-}
-
-.sidebar .sidemenu li {
-  padding: 20px;
-  border-radius: 5px;
-  border: solid 1px grey;
-}
-
-.room {
-  flex: 1;
-  padding: 20px;
-  text-align: center;
 }
 
 </style>
