@@ -1,38 +1,21 @@
 <template>
 
-    <!-- 모달창 : 기존에 등록해두고 호출하는 형태 -->
-    <!-- v-if 조건식 -->
-    <div class="black-bg" v-if="modalIsOpen">
-      <div class="white-bg">
-        <h3>상세 페이지</h3>
-        <h4>{{ modalTitle }}</h4>
-        <p>{{ modalContent }}</p>
-        <button @click="modalClose">닫기</button>
-      </div>
-    </div>
+  <!-- 모달창 : 기존에 등록해두고 호출하는 형태 -->
+  <!-- v-if 조건식 -->
+  <!-- 부모 -> 자식 컴포넌트 데이터 전달 (props)
+       부모 컴포넌트에서 자식 컴포넌트 호출 시 변수명:값 으로 전달
+       만약 동적 값이라면 :변수명:값 으로 전달할 것
+       자식 컴포넌트에서는 <script> 내부에서 props : ['전달변수명'] 으로 받음 
+    -->
+  <modal-layout v-if="modalIsOpen" :title="modalTitle" :content="modalContent" @modal-state="modalClose"/>
+  <!-- 자식 -> 부모 컴포넌트 데이터 전달 (emit)
+       자식 컴포넌트에서 호출하는 함수() {this.$emit('부모 컴포넌트에서 받을 변수명', 전달할 값)}
+       부모 컴포넌트에서 @받는 변수 명="부모 컴포넌트 내에서 값을 변경하기 위해 호출할 함수"
+  -->
+  <app-header/>
 
-  <div class="menu">
-    <!-- 반복적인 요소의 축약 v-for
-      v-for="변수명 in array" :key="변수명"
-      -> 변수명을 데이터 바인딩할 수 있음
-      ( :key = "이름" 넣을 것 ) 
-       key는 반복문의 요소를 구분시키는 역할을 함
-       이때 in 안에 (a, i)까지 변수로 설정할 수 있음.
-       a는 array의 값, i는 각 값의 인덱스
-    -->
-      <a v-for="(menu, idx) in menus" :key="idx">{{ menu }}</a>
-    <!--
-    <a>Home</a>
-    <a>Products</a>
-    <a>About</a>
-    -->
-  </div>
   <div class="totalDiv">
-    <div class="sidebar">
-      <ul class="sidemenu">
-        <li v-for="(li, idx) in lis" :key="idx" @click="showAlert(idx)">{{ li }}</li>
-      </ul>
-    </div>
+    <side-bar @sortStandard="sorting"/>
 
   <!-- {{ dataname }} 으로 값을 받아옴 -->
   <!-- 데이터바인딩 하는 이유
@@ -46,8 +29,32 @@
       ++ HTML 속성도 바인딩 가능 ++
       ++ :속성 = "바인딩 변수명" ++
   -->
-    <div class="room-container">
+    <div v-if="!priceFilter && orderbyPrice == 0 && !orderbyName" class="room-container">
       <div class="room" v-for="(oneroom, idx) in onerooms" :key="idx">
+        <img :src="oneroom.image" class="room-img">
+        <h4 @click="modalOpen(idx)">{{ oneroom.title }}</h4>  
+        <p>{{ oneroom.price }} 원</p>
+      </div>
+    </div>
+
+    <div v-if="orderbyName" class="room-container">
+      <div class="room" v-for="(oneroom, idx) in orderedByName" :key="idx">
+        <img :src="oneroom.image" class="room-img">
+        <h4 @click="modalOpen(idx)">{{ oneroom.title }}</h4>  
+        <p>{{ oneroom.price }} 원</p>
+      </div>
+    </div>
+
+    <div v-if="orderbyPrice != 0" class="room-container">
+      <div class="room" v-for="(oneroom, idx) in orderedByPrice" :key="idx">
+        <img :src="oneroom.image" class="room-img">
+        <h4 @click="modalOpen(idx)">{{ oneroom.title }}</h4>  
+        <p>{{ oneroom.price }} 원</p>
+      </div>
+    </div>
+
+    <div v-if="priceFilter" class="room-container">
+      <div class="room" v-for="(oneroom, idx) in filteredByPrice" :key="idx">
         <img :src="oneroom.image" class="room-img">
         <h4 @click="modalOpen(idx)">{{ oneroom.title }}</h4>  
         <p>{{ oneroom.price }} 원</p>
@@ -87,7 +94,9 @@
 </template>
 
 <script>
-
+import AppHeader from "./components/layouts/AppHeader.vue";
+import ModalLayout from "./components/layouts/ModalLayout.vue";
+import SideBar from "./components/layouts/SideBar.vue";
 import roomdata from "./data/rooms.js";
 
 // DataBinding //
@@ -97,19 +106,14 @@ export default {
     // return { } 내에 데이터를 모두 보관 //
     // object 형식으로 나타냄 //
     return {
-      //price1 : 80,
-      //price2 : 70,
       onerooms : roomdata,
-      menus : ['Home', 'Shop', 'About'],
       homes : ['역삼동 원룸', '천호동 원룸', '마포구 원룸'],
       reports : [0, 0, 0],
-      lis : ['이름별 정렬', '가격별 정렬', '50만원 이상'],
       products : [
         {name : '역삼동 원룸', price : 80},
         {name : '천호동 원룸', price : 70},
         {name : '마포구 원룸', price : 95},
       ],
-      reportTimes : 0,
       /* 
         1. UI의 현재 상태를 데이터로 저장해둠
         2. 데이터에 따라 UI가 어떻게 보일지 작성
@@ -117,29 +121,63 @@ export default {
       modalIsOpen : false,
       modalTitle : "",
       modalContent : "",
+      priceFilter : false,
+      orderbyName : false,
+      orderbyPrice : 0,
     }
   },
   // Vue에서의 함수 -> methods : {}
   // this -> export default { } 내의 데이터 사용
   methods: {
-    increase() {
-      this.reportTimes += 1;
-    },
     modalOpen(idx) {
       this.modalIsOpen = true;
-      this.modalTitle = this.onerooms[idx].title;
-      this.modalContent = this.onerooms[idx].content;
+      if(this.orderbyName) {
+        this.modalTitle = this.orderedByName[idx].title;
+        this.modalContent = this.orderedByName[idx].content;
+      } else if(this.orderbyPrice) {
+        this.modalTitle = this.orderedByPrice[idx].title;
+        this.modalContent = this.orderedByPrice[idx].content;
+      } else if(this.priceFilter) {
+        this.modalTitle = this.filteredByPrice[idx].title;
+        this.modalContent = this.filteredByPrice[idx].content;
+      } else {
+        this.modalTitle = this.onerooms[idx].title;
+        this.modalContent = this.onerooms[idx].content;
+      }
     },
     modalClose() {
       this.modalIsOpen = false;
       this.modalTitle = "";
       this.modalContent = "";
     },
-    showAlert(idx) {
-      alert(`Vuejs 알림창 idx : ${idx}`);
+    sorting(state) {
+      if(state.sortByN) {this.orderbyName = !this.orderbyName; this.orderbyPrice = false; this.priceFilter = false;}
+      else if(state.sortByP) {
+        this.orderbyName = false; this.priceFilter = false;
+        this.orderbyPrice = (this.orderbyPrice + 1) % 3;
+      }
+      else if(state.filterByP) {this.orderbyName = false; this.orderbyPrice = false; this.priceFilter = !this.priceFilter;}
+      else {this.orderbyName = false; this.orderbyPrice = false; this.priceFilter = false;}
     },
   },
   components: {
+    AppHeader,
+    ModalLayout,
+    SideBar,
+  },
+  computed: {
+    filteredByPrice() {
+      return this.onerooms.filter( oneroom => {
+        return (oneroom.price >= 500000);
+      }).sort((a, b) => a.price - b.price);
+    },
+    orderedByPrice() {
+      return[...this.onerooms].sort((a, b) => {
+        return this.orderbyPrice == 1? a.price - b.price : b.price - a.price;});
+    },
+    orderedByName() {
+      return[...this.onerooms].sort((a, b) => {return a.title.localeCompare(b.title, 'ko-KR')});
+    }
   }
 }
 </script>
@@ -153,15 +191,6 @@ export default {
   color: #2c3e50;
 }
 
-.menu {
-  background: darkslateblue;
-  padding: 15px;
-  border-radius: 5px;
-}
-.menu a {
-  color: white;
-  padding: 10px;
-}
 
 .room-img {
   width: 100%;
@@ -172,22 +201,6 @@ export default {
 
 body {
   margin : 0
-}
-
-div {
-  box-sizing: border-box;
-}
-
-.black-bg {
-  width: 100%; height: 100%;
-  background: rgba(0, 0, 0, 0.5);
-  position: fixed; padding : 20px;
-}
-
-.white-bg {
-  width: 100%; background: white;
-  border-radius: 8px;
-  padding: 20px;
 }
 
 .room-container {
