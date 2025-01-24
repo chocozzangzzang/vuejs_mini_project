@@ -1,28 +1,62 @@
 <template>
-  <div class="room-container">
-    <div class="room" v-for="(oneroom, idx) in nowOneRoom" :key="idx">
-        <img :src="oneroom.image" class="room-img">
-        <h4 @click="sendInfo(idx)">{{ oneroom.title }}</h4>
-        <p>{{ oneroom.price }} 원</p>
-    </div>
+    <modal-layout v-if="modalIsOpen" :title="modalTitle" :content="modalContent" @modal-state="modalClose"/>
+    <div class="totalDiv">
+        <SideBar @sortStandard="sorting"/>
+        <div class="room-container">
+            <div class="room" v-for="(oneroom, idx) in nowOneRoom" :key="idx">
+                <img :src="oneroom.image" class="room-img">
+                <h4 @click="sendInfo(idx)">{{ oneroom.title }}</h4>
+                <p>{{ oneroom.price }} 원</p>
+            </div>
+        </div>
   </div>
 </template>
 
 <script>
 import roomdata from "../data/rooms.js";
+import ModalLayout from "./layouts/ModalLayout.vue";
+import SideBar from "./layouts/SideBar.vue";
 
 export default {
-    props : ['orderByTitle', 'orderByPrice', 'filterByPrice'],
     data() {
         return {
             onerooms : roomdata,
+            modalIsOpen : false,
+            modalTitle : "",
+            modalContent : "",
+            orderByTitle : false,
+            orderByPrice : 0,
+            filterByPrice : false,
         }
     },
     methods : {
+        modalClose() {
+            this.modalIsOpen = false;
+            this.modalTitle = "";
+            this.modalContent = "";
+        },
         sendInfo(idx) {
-            this.$emit("oneroomInfo", 
-            {title : this.nowOneRoom[idx].title,
-             content : this.nowOneRoom[idx].content});
+            this.modalIsOpen = true;
+            this.modalTitle = this.nowOneRoom[idx].title;
+            this.modalContent = this.nowOneRoom[idx].content;
+        },
+        sorting(state) {
+            if(state.sortByN) {
+                this.orderByTitle = !this.orderByTitle; 
+                this.orderbyPrice = 0;
+                this.filterByPrice = false;}
+            else if(state.sortByP) {
+                this.orderByTitle = false; 
+                this.orderByPrice = (this.orderByPrice + 1) % 3;
+                this.filterByPrice = false;}
+            else if(state.filterByP) {
+                this.orderbyName = false; 
+                this.orderbyPrice = 0; 
+                this.filterByPrice = !this.filterByPrice;}
+            else {
+                this.orderbyName = false; 
+                this.orderbyPrice = 0; 
+                this.filterByPrice = false;}
         }
     },
     computed : {
@@ -43,11 +77,21 @@ export default {
                 return this.onerooms;
             }
         }
+    },
+    components : {
+        SideBar,
+        ModalLayout,
     }
 }
 </script>
 
 <style>
+.totalDiv {
+  display: grid;
+  grid-template-columns: 1fr 6fr;
+  gap: 10px;
+}
+
 .room-container {
   display: grid;
   grid-template-columns: 1fr 1fr; /* 두 개의 동일한 너비 컬럼 */

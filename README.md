@@ -40,3 +40,10 @@
 ## 자식 -> 부모 컴포넌트 데이터 전달 (emit)
 > 1. 자식 컴포넌트에서 호출하는 함수() {this.$emit('부모 컴포넌트에서 받을 변수명', 전달할 값)}
 > 2. 부모 컴포넌트에서 @받는 변수 명="부모 컴포넌트 내에서 값을 변경하기 위해 호출할 함수"
+
+## vue-router
+
+### 사용법
+> 1. index.js에 {path : , name : , component : } 형태로 정의
+> 2. App.vue에 <router-link to="경로"></router-link> 정의
+> 3. App.vue에 <router-view></router-view> 정의

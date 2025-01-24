@@ -21,14 +21,14 @@
 export default {
     data() {
         return {
-            menus : ['Home', 'Shop', 'About'],
+            menus : ['Home', 'Shop', 'Instagram'],
         }
     },
     methods : {
       menuAlert(idx) {
-        if(idx == 0) alert("Home!!!!");
-        else if(idx == 1) alert("Shop!!!!");
-        else if(idx == 2) alert("About!!!!");
+        if(idx == 0) this.$router.push('/home');
+        else if(idx == 1) this.$router.push('/rooms');
+        else if(idx == 2) this.$router.push('/instagram');
       }
     },
 }
