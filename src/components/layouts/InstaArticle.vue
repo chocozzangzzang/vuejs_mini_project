@@ -2,22 +2,22 @@
   <div class="post">
     <div class="post-header">
         <img src="../../assets/logo.png" alt="profile" class="profile-img"/>
-        <span class="username">NICKNAME</span>
+        <span class="username">{{ postInfo.nickname }}</span>
     </div>
     <div class="post-image">
-        <img src="../../assets/room0.jpg" alt="post image" />
+        <img :src="postInfo.imageUrl" alt="post image" />
     </div>
     <div class="post-details">
-        <p class="likes">43 Likes</p>
-        <p class="post-content"><strong>ID</strong> 내용</p>
-        <p class="post-date">Jan 24, 2025</p>
+        <p class="likes">{{ postInfo.likes }} likes</p>
+        <p class="post-content"><strong>{{ postInfo.userid }}</strong> {{ postInfo.content }}</p>
+        <p class="post-date">{{ postInfo.date }}</p>
     </div>
   </div>
 </template>
 
 <script>
 export default {
-
+  props : ['postInfo'],
 }
 </script>
 

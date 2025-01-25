@@ -47,3 +47,5 @@
 > 1. index.js에 {path : , name : , component : } 형태로 정의
 > 2. App.vue에 <router-link to="경로"></router-link> 정의
 > 3. App.vue에 <router-view></router-view> 정의
+
+## cf. git config core.autocrlf true << git add 시 CRLF WARNING 해결법

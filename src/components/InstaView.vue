@@ -1,17 +1,23 @@
 <template>
   <div class="center-align">
     <insta-header/>
-    <insta-article/>
+    <insta-article v-for="(post, idx) in allPost" :key="idx" :postInfo="post"/>
   </div>
 </template>
 
 <script>
 import InstaHeader from './layouts/InstaHeader.vue'
 import InstaArticle from './layouts/InstaArticle.vue';
+import posts from "../data/post.js";
 export default {
   components : {
     InstaHeader,
     InstaArticle,
+  },
+  data() {
+    return {
+      allPost : posts,
+    }
   }
 }
 </script>

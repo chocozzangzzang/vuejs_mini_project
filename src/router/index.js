@@ -1,17 +1,18 @@
 import { createRouter, createWebHistory } from "vue-router";
 import RoomInfo from "../components/RoomInfo.vue";
 import InstaView from "@/components/InstaView.vue";
+import HomePage from "@/components/HomePage.vue";
 
 const routes = [
     {
         path : '/',
         name : 'Main',
-        component : RoomInfo
+        component : HomePage,
     },
     {
         path : '/home',
         name : 'Home',
-        component : RoomInfo
+        component : HomePage,
     },
     {
         path : '/rooms',
