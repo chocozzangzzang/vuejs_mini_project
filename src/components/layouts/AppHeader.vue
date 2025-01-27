@@ -21,7 +21,7 @@
 export default {
     data() {
         return {
-            menus : ['Home', 'Shop', 'Instagram'],
+            menus : ['Home', 'Shop', 'Instagram', 'Post'],
         }
     },
     methods : {
@@ -29,6 +29,7 @@ export default {
         if(idx == 0) this.$router.push('/home');
         else if(idx == 1) this.$router.push('/rooms');
         else if(idx == 2) this.$router.push('/instagram');
+        else if(idx == 3) this.$router.push('/post');
       }
     },
 }
