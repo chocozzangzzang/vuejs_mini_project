@@ -5,6 +5,7 @@ import HomePage from "@/components/HomePage.vue";
 import PostView from "@/components/PostView.vue";
 import { useAuthStore } from "@/store/auth";
 import LoginView from "@/components/LoginView.vue";
+import SignInView from "@/components/SignInView.vue";
 
 const routes = [
     {
@@ -37,6 +38,11 @@ const routes = [
         path : '/login',
         name : 'Login',
         component : LoginView,
+    },
+    {
+        path : '/signIn',
+        name : 'SignIn',
+        component : SignInView,
     }
 ];
 

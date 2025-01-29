@@ -10,6 +10,8 @@
             <input id="userpw" type="password" v-model="userPw" placeholder="PW"/>
             </div>
             <button type="submit">로그인</button>
+            <button @click="googleSignIn">구글로그인</button>
+            <button @click="signIn">회원가입</button>
             <div v-if="errorMessage" class="error">{{ errorMessage }}</div>
         </form>
         
@@ -20,7 +22,7 @@
 import { auth } from '@/firebase';
 import { ref } from 'vue';
 import { useRouter } from 'vue-router';
-import { signInWithEmailAndPassword } from 'firebase/auth';
+import { GoogleAuthProvider, signInWithEmailAndPassword, signInWithPopup } from 'firebase/auth';
 import { useAuthStore } from '../store/auth.js';
 
 
@@ -44,14 +46,32 @@ export default {
             }
         }
 
+        const googleSignIn = async() => {
+            const provider = new GoogleAuthProvider();
+            try {
+                const result = await signInWithPopup(auth, provider);
+                authStore.login();
+                console.log(result.user);
+                route.push('/post');
+            } catch (error) {
+                console.log(error);
+            }
+        }
+
         return {
             userEmail,
             userPw,
             errorMessage,
-            loginEmailPW
+            loginEmailPW,
+            googleSignIn
         };
+    },
+
+    methods : {
+        signIn() {
+            this.$router.push('/signIn');
+        }
     }
-    
 }
 </script>
 
