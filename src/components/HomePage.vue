@@ -1,24 +1,41 @@
 <template>
-  <h3>3일 기상 예보</h3>
-  <div v-for="(data, idx) in forecast" :key=idx>
-    <p>날짜 : {{ data.date }}</p>
-    <p>시간 : {{ data.time }}</p>
-    <p>기온 : {{ data.temp }}</p>
-  </div>
+  <h3>기상 예보</h3>
+  <p v-if="allDatas">현재 날씨 : {{ this.allDatas.datasets[0].data[0] }} ℃</p>
+  <line-chart v-if="allDatas"
+  :temperData="allDatas"
+  :chartOption="chartOptions"
+  height="20" width="50">
+  </line-chart>
 </template>
 
 <script>
-import { ref } from 'vue';
-
+import positions from '../data/positions.js';
+import { onMounted, ref } from 'vue';
+import LineChart from './chart/LineChart.vue';
 
 export default {
+  components : {
+    LineChart,
+  },
+
+  data() {
+    return {
+      chartOptions : {responsive : true,},
+    }
+  },
 
   setup() {
+    // console.log(positions);
 
     const time = Date.now();
     const today = new Date(time);
     const yester = new Date(time);
-    const forecast = ref([]);
+    const allDatas = ref(null);
+    const labels = ref([]);
+    const values = ref([]);
+
+    const xpos = ref(positions[0].xpos);
+    const ypos = ref(positions[0].ypos);
     var yesterday = false;
 
     var BaseTime = "";
@@ -53,9 +70,9 @@ export default {
       else BaseDate += today.getDate();
     }
 
-    console.log(`${BaseDate} ${BaseTime}`);
-  
-    const getForeCast = async () => {
+    //console.log(`${BaseDate} ${BaseTime}`);
+
+    onMounted(async () => {
       try {
 
         var xhr = new XMLHttpRequest();
@@ -66,70 +83,44 @@ export default {
         queryParams += '&' + encodeURIComponent('dataType') + '=' + encodeURIComponent('JSON'); /**/
         queryParams += '&' + encodeURIComponent('base_date') + '=' + encodeURIComponent(BaseDate); /**/
         queryParams += '&' + encodeURIComponent('base_time') + '=' + encodeURIComponent(BaseTime); /**/
-        queryParams += '&' + encodeURIComponent('nx') + '=' + encodeURIComponent('55'); /**/
-        queryParams += '&' + encodeURIComponent('ny') + '=' + encodeURIComponent('127'); /**/
+        queryParams += '&' + encodeURIComponent('nx') + '=' + encodeURIComponent(xpos.value); /**/
+        queryParams += '&' + encodeURIComponent('ny') + '=' + encodeURIComponent(ypos.value); /**/
         
         //const data = await response.json();
         await xhr.open('GET', url + queryParams);
         xhr.onreadystatechange = function () {
             if (this.readyState == 4) {
-              const data = JSON.parse(this.response).response.body.items.item.filter(item => item.category === "TMP");
-              console.log(`output->`, data);
-              data.forEach(f => {
-                forecast.value.push({
-                  date : f.fcstDate,
-                  time : f.fcstTime,
-                  temp : f.fcstValue,
-                })
+              const tempVals = JSON.parse(this.response).response.body.items.item.filter(item => item.category === "TMP");
+              // console.log(`output->`, data);
+              tempVals.forEach(f => {
+                values.value.push(f.fcstValue);
+                labels.value.push(f.fcstDate + " " + f.fcstTime);
               });
-              console.log(`output->`,forecast.value);
+              allDatas.value = {
+                labels : labels.value,
+                datasets : [{
+                  label : 'Temperature',
+                  backgroundColor : '#f87979',
+                  data : values.value,
+                  borderColor : 'red',
+                }],
+              }
+              // console.log(alldata.value.datasets.data);
+              //console.log(`output->`,forecast.value);
             }
         };
 
         xhr.send('');
-
-      //   var url = 'http://apis.data.go.kr/1360000/VilageFcstInfoService_2.0/getVilageFcst'; /*URL*/
-      //   url += "?serviceKey=" + process.env.VUE_APP_FORECAST_KEY + "&pageNo=1&numOfRows=1000&dataType=JSON";
-      //   url += "&base_date" + BaseDate + "&base_time" + BaseTime + "&nx=55&ny=127"; 
-
-      //   const response = await fetch(url)
-      //     .then(resp => {
-      //       const reader = resp.body.getReader();
-      //       let chunks = [];
-      //       let decoder = new TextDecoder();
-
-      //       return reader.read().then(function processText({done, value}) {
-      //         if(done) {
-      //           const result = decoder.decode(new Uint8Array(chunks));
-      //           console.log(`output->`, result);
-      //           return;
-      //         }
-      //         chunks.push(...value);
-      //         return reader.read().then(processText);
-      //       })
-      //     });
-
-      //   console.log(`output->`,response.getReader());
-        
-      //   if(!response.ok) {
-      //     throw new Error(`http 오류 코드 : ${response.status}`);
-      //   }
-      //   const data = await response.json();
-      //   console.log(`output->`, data);
-
-        
-      // }
         }
        catch(err) {console.log(err);}
-    }
-
-    getForeCast();
+    })
 
     return {
-      getForeCast,
-      forecast,
+      allDatas,
+      // getForeCast,
+      // forecast,
     }
-  }
+  },
 }
 </script>
 
