@@ -1,6 +1,8 @@
 <template>
   <h3>기상 예보</h3>
   <p v-if="allDatas">현재 날씨 : {{ this.allDatas.datasets[0].data[0] }} ℃</p>
+  <p v-if="getCurrAddr">{{ getCurrAddr }}의 날씨</p>
+  <button @click="getCurrentPosition">현재위치</button>
   <line-chart v-if="allDatas"
   :temperData="allDatas"
   :chartOption="chartOptions"
@@ -10,8 +12,9 @@
 
 <script>
 import positions from '../data/positions.js';
-import { onMounted, ref } from 'vue';
+import { computed, onMounted, ref } from 'vue';
 import LineChart from './chart/LineChart.vue';
+import axios from 'axios';
 
 export default {
   components : {
@@ -26,6 +29,58 @@ export default {
 
   setup() {
     // console.log(positions);
+    const addr = ref('');
+    const depth1 = ref('');
+    const depth2 = ref('');
+    const depth3 = ref('');
+
+    const getCurrAddr = computed(() => {
+      return addr.value;
+    });
+
+    const loadKakaoMap = () => {
+      const script = document.createElement("script");
+      script.src = `https://dapi.kakao.com/v2/maps/sdk.js?appkey=${process.env.VUE_APP_KAKAO_MAP_KEY}&autoload=false`;
+      document.head.appendChild(script);
+    };
+    
+    const getCurrentPosition = () => {
+      if(navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition(
+          (position) => {
+            // console.log(position);
+            const lat = position.coords.latitude;
+            const lon = position.coords.longitude;
+            // const locPosition = new kakao.maps.Lating(lat, lon);
+            console.log(`${lat} ${lon}`);
+            getAddr(lat, lon);
+          }
+        )
+      }
+    }
+
+    const getAddr = async (lat, lon) => {
+      try {
+        var url = 'https://dapi.kakao.com/v2/local/geo/coord2address.json';
+        var query = '?x=' + lon + '&y=' + lat;
+        await axios.get(url + query, {
+          headers : {
+            Authorization : `KakaoAK ${process.env.VUE_APP_KAKAO_LOCAL_KEY_RESTAPI}`
+          }
+        }).then((result) => {
+          depth1.value = result.data.documents[0].road_address.region_1depth_name;
+          depth2.value = result.data.documents[0].road_address.region_2depth_name;
+          depth3.value = result.data.documents[0].road_address.region_3depth_name;
+          addr.value = depth1.value + " " + depth2.value + " " + depth3.value;
+          // console.log(depth1.value);
+          var filtered = positions.filter(pos => (pos.second === depth2.value && pos.three === depth3.value));
+          console.log(filtered);
+          // getWeather(filtered[0].xpos, filtered[0].ypos);
+        });
+      } catch (err) {
+        console.log(err);
+      }
+    }
 
     const time = Date.now();
     const today = new Date(time);
@@ -72,9 +127,13 @@ export default {
 
     //console.log(`${BaseDate} ${BaseTime}`);
 
-    onMounted(async () => {
-      try {
+    onMounted(() => {
+      loadKakaoMap();
+      getWeather(xpos.value, ypos.value);
+    });
 
+    const getWeather = async (x, y) => {
+      try {
         var xhr = new XMLHttpRequest();
         var url = 'http://apis.data.go.kr/1360000/VilageFcstInfoService_2.0/getVilageFcst'; /*URL*/
         var queryParams = '?' + encodeURIComponent('serviceKey') + '='+ process.env.VUE_APP_FORECAST_KEY; /*Service Key*/
@@ -83,15 +142,15 @@ export default {
         queryParams += '&' + encodeURIComponent('dataType') + '=' + encodeURIComponent('JSON'); /**/
         queryParams += '&' + encodeURIComponent('base_date') + '=' + encodeURIComponent(BaseDate); /**/
         queryParams += '&' + encodeURIComponent('base_time') + '=' + encodeURIComponent(BaseTime); /**/
-        queryParams += '&' + encodeURIComponent('nx') + '=' + encodeURIComponent(xpos.value); /**/
-        queryParams += '&' + encodeURIComponent('ny') + '=' + encodeURIComponent(ypos.value); /**/
+        queryParams += '&' + encodeURIComponent('nx') + '=' + encodeURIComponent(x); /**/
+        queryParams += '&' + encodeURIComponent('ny') + '=' + encodeURIComponent(y); /**/
         
         //const data = await response.json();
         await xhr.open('GET', url + queryParams);
         xhr.onreadystatechange = function () {
             if (this.readyState == 4) {
               const tempVals = JSON.parse(this.response).response.body.items.item.filter(item => item.category === "TMP");
-              // console.log(`output->`, data);
+              console.log(`output->`, tempVals);
               tempVals.forEach(f => {
                 values.value.push(f.fcstValue);
                 labels.value.push(f.fcstDate + " " + f.fcstTime);
@@ -113,10 +172,14 @@ export default {
         xhr.send('');
         }
        catch(err) {console.log(err);}
-    })
+    };
 
     return {
       allDatas,
+      getCurrentPosition,
+      getCurrAddr,
+      getWeather,
+      getAddr,
       // getForeCast,
       // forecast,
     }
