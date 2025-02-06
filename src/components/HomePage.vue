@@ -3,6 +3,40 @@
   <p v-if="allDatas">현재 날씨 : {{ this.allDatas.datasets[0].data[0] }} ℃</p>
   <p v-if="getCurrAddr">{{ getCurrAddr }}의 날씨</p>
   <button @click="getCurrentPosition">현재위치</button>
+  <v-container>
+    <div class="selects-inline">
+      <v-select
+          v-model="selectedCity"
+          :items="cities"
+          label="시/도"
+          item-text="name"
+          item-value="name"
+          class="selectBox"
+          dense
+        >
+        </v-select>
+        <v-select
+          v-model="selectedCity"
+          :items="cities"
+          label="군/구"
+          item-text="name"
+          item-value="name"
+          class="selectBox"
+          dense
+        >
+        </v-select>
+        <v-select
+          v-model="selectedCity"
+          :items="cities"
+          label="읍/면/동"
+          item-text="name"
+          item-value="name"
+          class="selectBox"
+          dense
+        >
+        </v-select>
+    </div>
+  </v-container>
   <line-chart v-if="allDatas"
   :temperData="allDatas"
   :chartOption="chartOptions"
@@ -15,10 +49,12 @@ import positions from '../data/positions.js';
 import { computed, onMounted, ref } from 'vue';
 import LineChart from './chart/LineChart.vue';
 import axios from 'axios';
+import { VSelect } from 'vuetify/lib/components/index.mjs';
 
 export default {
   components : {
     LineChart,
+    VSelect,
   },
 
   data() {
@@ -52,11 +88,26 @@ export default {
             const lat = position.coords.latitude;
             const lon = position.coords.longitude;
             // const locPosition = new kakao.maps.Lating(lat, lon);
-            console.log(`${lat} ${lon}`);
+            // console.log(`${lat} ${lon}`);
             getAddr(lat, lon);
           }
         )
       }
+    }
+
+    const getWildCars = (str) => {
+      return "*" + str.split("").join("*") + "*";
+    }
+
+    const matching = (pattern, str) => {
+      // '*'을 '.*'로 변환하여 정규식 패턴 생성
+      let regexPattern = pattern
+        .replace(/[.+^${}()|[\]\\]/g, "\\$&") // 정규식 특수문자 이스케이프
+        .replace(/\*/g, ".*"); // '*' → '.*' (아무 글자 여러 개)
+
+      let regex = new RegExp(`^${regexPattern}$`, "i"); // 대소문자 구분 없음
+      return regex.test(str);
+
     }
 
     const getAddr = async (lat, lon) => {
@@ -68,14 +119,22 @@ export default {
             Authorization : `KakaoAK ${process.env.VUE_APP_KAKAO_LOCAL_KEY_RESTAPI}`
           }
         }).then((result) => {
-          depth1.value = result.data.documents[0].road_address.region_1depth_name;
-          depth2.value = result.data.documents[0].road_address.region_2depth_name;
-          depth3.value = result.data.documents[0].road_address.region_3depth_name;
+          // console.log(result.data.documents[0]);
+          depth1.value = result.data.documents[0].address.region_1depth_name;
+          depth2.value = result.data.documents[0].address.region_2depth_name;
+          depth3.value = result.data.documents[0].address.region_3depth_name;
+          var wildcard1 = getWildCars(depth1.value);
+          var wildcard2 = getWildCars(depth2.value);
+          var wildcard3 = getWildCars(depth3.value);
+          // console.log(wildcard1);
+          // console.log(wildcard2);
+          // console.log(wildcard3);
           addr.value = depth1.value + " " + depth2.value + " " + depth3.value;
-          // console.log(depth1.value);
-          var filtered = positions.filter(pos => (pos.second === depth2.value && pos.three === depth3.value));
-          console.log(filtered);
-          // getWeather(filtered[0].xpos, filtered[0].ypos);
+          var filtered = positions.filter(pos => (matching(wildcard1, pos.first) && matching(wildcard2, pos.second) && matching(wildcard3, pos.three)));
+          // console.log(filtered);
+          values.value = []
+          labels.value = [];
+          getWeather(filtered[0].xpos, filtered[0].ypos);
         });
       } catch (err) {
         console.log(err);
@@ -88,6 +147,12 @@ export default {
     const allDatas = ref(null);
     const labels = ref([]);
     const values = ref([]);
+
+    const cities = ref([]);
+    const districts = ref([]);
+    const towns = ref([]);
+    const cards = ref([]);
+    const selectedCity = ref([]);
 
     const xpos = ref(positions[0].xpos);
     const ypos = ref(positions[0].ypos);
@@ -129,8 +194,21 @@ export default {
 
     onMounted(() => {
       loadKakaoMap();
+      addr.value = positions[0].first;
       getWeather(xpos.value, ypos.value);
+      setVcards();
     });
+
+    const setVcards = () => {
+      var id = 0;
+      positions.forEach(pos => {
+        cities.value.push({name : pos.first});
+        districts.value.push({city : pos.first, name : pos.second});
+        towns.value.push({city : pos.first, district : pos.second, name : pos.three});
+        cards.value.push({id : id, name : '카드' + id.toString(), city : pos.first, district : pos.second, town : pos.three});
+        id++;
+      });
+    }
 
     const getWeather = async (x, y) => {
       try {
@@ -150,7 +228,7 @@ export default {
         xhr.onreadystatechange = function () {
             if (this.readyState == 4) {
               const tempVals = JSON.parse(this.response).response.body.items.item.filter(item => item.category === "TMP");
-              console.log(`output->`, tempVals);
+              // console.log(`output->`, tempVals);
               tempVals.forEach(f => {
                 values.value.push(f.fcstValue);
                 labels.value.push(f.fcstDate + " " + f.fcstTime);
@@ -162,6 +240,7 @@ export default {
                   backgroundColor : '#f87979',
                   data : values.value,
                   borderColor : 'red',
+                  tension : 0.4,
                 }],
               }
               // console.log(alldata.value.datasets.data);
@@ -180,6 +259,7 @@ export default {
       getCurrAddr,
       getWeather,
       getAddr,
+      selectedCity,
       // getForeCast,
       // forecast,
     }
@@ -187,6 +267,17 @@ export default {
 }
 </script>
 
-<style>
+<style scoped>
+.selects-inline {
+  display: flex;               /* Flexbox 사용 */
+  justify-content: center;     /* 수평 가운데 정렬 */
+  align-items: center;         /* 수직 가운데 정렬 */
+  padding: 10px;
+  gap: 15px;
+}
 
+.selectBox {
+  max-width: 200px; 
+  font-size: 12px; 
+}
 </style>

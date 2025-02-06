@@ -3523,6 +3523,13 @@ var positions = [
     {
       "first": "부산광역시",
       "second": "부산진구",
+      "three": "부전동",
+      "xpos": 98,
+      "ypos": 75
+    },
+    {
+      "first": "부산광역시",
+      "second": "부산진구",
       "three": "부전제1동",
       "xpos": 98,
       "ypos": 75
@@ -3551,6 +3558,13 @@ var positions = [
     {
       "first": "부산광역시",
       "second": "부산진구",
+      "three": "양정동",
+      "xpos": 98,
+      "ypos": 76
+    },
+    {
+      "first": "부산광역시",
+      "second": "부산진구",
       "three": "양정제1동",
       "xpos": 98,
       "ypos": 76
@@ -3561,6 +3575,13 @@ var positions = [
       "three": "양정제2동",
       "xpos": 98,
       "ypos": 76
+    },
+    {
+      "first": "부산광역시",
+      "second": "부산진구",
+      "three": "전포동",
+      "xpos": 98,
+      "ypos": 75
     },
     {
       "first": "부산광역시",
@@ -3579,6 +3600,13 @@ var positions = [
     {
       "first": "부산광역시",
       "second": "부산진구",
+      "three": "부암동",
+      "xpos": 97,
+      "ypos": 75
+    },
+    {
+      "first": "부산광역시",
+      "second": "부산진구",
       "three": "부암제1동",
       "xpos": 97,
       "ypos": 75
@@ -3587,6 +3615,13 @@ var positions = [
       "first": "부산광역시",
       "second": "부산진구",
       "three": "부암제3동",
+      "xpos": 97,
+      "ypos": 75
+    },
+    {
+      "first": "부산광역시",
+      "second": "부산진구",
+      "three": "당감동",
       "xpos": 97,
       "ypos": 75
     },
@@ -3614,6 +3649,13 @@ var positions = [
     {
       "first": "부산광역시",
       "second": "부산진구",
+      "three": "가야동",
+      "xpos": 97,
+      "ypos": 75
+    },
+    {
+      "first": "부산광역시",
+      "second": "부산진구",
       "three": "가야제1동",
       "xpos": 97,
       "ypos": 75
@@ -3622,6 +3664,13 @@ var positions = [
       "first": "부산광역시",
       "second": "부산진구",
       "three": "가야제2동",
+      "xpos": 97,
+      "ypos": 75
+    },
+    {
+      "first": "부산광역시",
+      "second": "부산진구",
+      "three": "개금동",
       "xpos": 97,
       "ypos": 75
     },
@@ -3644,6 +3693,13 @@ var positions = [
       "second": "부산진구",
       "three": "개금제3동",
       "xpos": 97,
+      "ypos": 75
+    },
+    {
+      "first": "부산광역시",
+      "second": "부산진구",
+      "three": "범천동",
+      "xpos": 98,
       "ypos": 75
     },
     {
@@ -3691,6 +3747,13 @@ var positions = [
     {
       "first": "부산광역시",
       "second": "동래구",
+      "three": "온천동",
+      "xpos": 98,
+      "ypos": 77
+    },
+    {
+      "first": "부산광역시",
+      "second": "동래구",
       "three": "온천제1동",
       "xpos": 98,
       "ypos": 77
@@ -3706,6 +3769,13 @@ var positions = [
       "first": "부산광역시",
       "second": "동래구",
       "three": "온천제3동",
+      "xpos": 98,
+      "ypos": 76
+    },
+    {
+      "first": "부산광역시",
+      "second": "동래구",
+      "three": "사직동",
       "xpos": 98,
       "ypos": 76
     },
@@ -3733,6 +3803,13 @@ var positions = [
     {
       "first": "부산광역시",
       "second": "동래구",
+      "three": "안락동",
+      "xpos": 98,
+      "ypos": 76
+    },
+    {
+      "first": "부산광역시",
+      "second": "동래구",
       "three": "안락제1동",
       "xpos": 98,
       "ypos": 76
@@ -3741,6 +3818,13 @@ var positions = [
       "first": "부산광역시",
       "second": "동래구",
       "three": "안락제2동",
+      "xpos": 98,
+      "ypos": 76
+    },
+    {
+      "first": "부산광역시",
+      "second": "동래구",
+      "three": "명장동",
       "xpos": 98,
       "ypos": 76
     },
@@ -3762,6 +3846,13 @@ var positions = [
       "first": "부산광역시",
       "second": "남구",
       "three": "",
+      "xpos": 98,
+      "ypos": 75
+    },
+    {
+      "first": "부산광역시",
+      "second": "남구",
+      "three": "대연동",
       "xpos": 98,
       "ypos": 75
     },
@@ -3803,6 +3894,13 @@ var positions = [
     {
       "first": "부산광역시",
       "second": "남구",
+      "three": "용호동",
+      "xpos": 99,
+      "ypos": 74
+    },
+    {
+      "first": "부산광역시",
+      "second": "남구",
       "three": "용호제1동",
       "xpos": 99,
       "ypos": 74
@@ -3838,6 +3936,13 @@ var positions = [
     {
       "first": "부산광역시",
       "second": "남구",
+      "three": "감만동",
+      "xpos": 98,
+      "ypos": 74
+    },
+    {
+      "first": "부산광역시",
+      "second": "남구",
       "three": "감만제1동",
       "xpos": 98,
       "ypos": 74
@@ -3853,6 +3958,13 @@ var positions = [
       "first": "부산광역시",
       "second": "남구",
       "three": "우암동",
+      "xpos": 98,
+      "ypos": 75
+    },
+    {
+      "first": "부산광역시",
+      "second": "남구",
+      "three": "문현동",
       "xpos": 98,
       "ypos": 75
     },
@@ -3889,6 +4001,13 @@ var positions = [
       "second": "북구",
       "three": "",
       "xpos": 96,
+      "ypos": 76
+    },
+    {
+      "first": "부산광역시",
+      "second": "북구",
+      "three": "구포동",
+      "xpos": 97,
       "ypos": 76
     },
     {
