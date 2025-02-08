@@ -7,30 +7,30 @@
     <div class="selects-inline">
       <v-select
           v-model="selectedCity"
-          :items="cities"
+          :items="getCities"
+          item-value="name"
+          item-title="name"
           label="시/도"
-          item-text="name"
-          item-value="name"
           class="selectBox"
           dense
         >
         </v-select>
         <v-select
-          v-model="selectedCity"
-          :items="cities"
+          v-model="selectedDistrict"
+          :items="getDistricts"
           label="군/구"
-          item-text="name"
           item-value="name"
+          item-title="name"
           class="selectBox"
           dense
         >
         </v-select>
         <v-select
-          v-model="selectedCity"
-          :items="cities"
-          label="읍/면/동"
-          item-text="name"
+          v-model="selectedTown"
+          :items="getTowns"
           item-value="name"
+          item-title="name"
+          label="읍/면/동"
           class="selectBox"
           dense
         >
@@ -50,6 +50,7 @@ import { computed, onMounted, ref } from 'vue';
 import LineChart from './chart/LineChart.vue';
 import axios from 'axios';
 import { VSelect } from 'vuetify/lib/components/index.mjs';
+import { watch } from 'vue';
 
 export default {
   components : {
@@ -72,6 +73,22 @@ export default {
 
     const getCurrAddr = computed(() => {
       return addr.value;
+    });
+
+    const getCities = computed(() => {
+      return filteredCities.value;
+    });
+
+    const getDistricts = computed(() => {
+      return selectedCity.value?
+        filteredDistricts.value.filter(filteredDistrict => filteredDistrict.city === selectedCity.value)
+        : filteredDistricts.value;
+    });
+
+    const getTowns = computed(() => {
+      return selectedDistrict.value?
+      filteredTowns.value.filter(filteredTown => filteredTown.district === selectedDistrict.value)
+      : filteredTowns.value;
     });
 
     const loadKakaoMap = () => {
@@ -132,7 +149,7 @@ export default {
           addr.value = depth1.value + " " + depth2.value + " " + depth3.value;
           var filtered = positions.filter(pos => (matching(wildcard1, pos.first) && matching(wildcard2, pos.second) && matching(wildcard3, pos.three)));
           // console.log(filtered);
-          values.value = []
+          values.value = [];
           labels.value = [];
           getWeather(filtered[0].xpos, filtered[0].ypos);
         });
@@ -149,10 +166,32 @@ export default {
     const values = ref([]);
 
     const cities = ref([]);
+    const filteredCities = ref([]);
+
     const districts = ref([]);
+    const filteredDistricts = ref([]);
+
     const towns = ref([]);
+    const filteredTowns = ref([]);
+
     const cards = ref([]);
-    const selectedCity = ref([]);
+
+    const selectedCity = ref(null);
+    const selectedDistrict = ref(null);
+    const selectedTown = ref(null);
+
+    watch([selectedCity, selectedDistrict, selectedTown], () => {
+      if(selectedCity.value && selectedDistrict.value && selectedTown.value) {
+        var wildcard1 = getWildCars(selectedCity.value);
+        var wildcard2 = getWildCars(selectedDistrict.value);
+        var wildcard3 = getWildCars(selectedTown.value);
+        var filtered = positions.filter(pos => (matching(wildcard1, pos.first) && matching(wildcard2, pos.second) && matching(wildcard3, pos.three)));
+        addr.value = selectedCity.value + " " + selectedDistrict.value + " " + selectedTown.value;
+        values.value = [];
+        labels.value = [];
+        getWeather(filtered[0].xpos, filtered[0].ypos);
+      }
+    });
 
     const xpos = ref(positions[0].xpos);
     const ypos = ref(positions[0].ypos);
@@ -208,6 +247,10 @@ export default {
         cards.value.push({id : id, name : '카드' + id.toString(), city : pos.first, district : pos.second, town : pos.three});
         id++;
       });
+      filteredCities.value = [...new Map(cities.value.map(city => [city.name, city])).values()];
+      filteredDistricts.value = [...new Map(districts.value.map(district => [district.name, district])).values()];
+      filteredTowns.value = [...new Map(towns.value.map(town => [town.name, town])).values()];
+      // console.log(filteredDistricts.value);
     }
 
     const getWeather = async (x, y) => {
@@ -260,6 +303,12 @@ export default {
       getWeather,
       getAddr,
       selectedCity,
+      selectedDistrict,
+      selectedTown,
+      getCities,
+      getDistricts,
+      getTowns,
+      // getSelectedWeather,
       // getForeCast,
       // forecast,
     }
