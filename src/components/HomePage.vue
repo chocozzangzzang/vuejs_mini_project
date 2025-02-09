@@ -180,16 +180,25 @@ export default {
     const selectedDistrict = ref(null);
     const selectedTown = ref(null);
 
-    watch([selectedCity, selectedDistrict, selectedTown], () => {
+    watch([selectedCity, selectedDistrict, selectedTown], ([newCity, newDistrict], [oldCity, oldDistrict]) => {
       if(selectedCity.value && selectedDistrict.value && selectedTown.value) {
-        var wildcard1 = getWildCars(selectedCity.value);
-        var wildcard2 = getWildCars(selectedDistrict.value);
-        var wildcard3 = getWildCars(selectedTown.value);
-        var filtered = positions.filter(pos => (matching(wildcard1, pos.first) && matching(wildcard2, pos.second) && matching(wildcard3, pos.three)));
-        addr.value = selectedCity.value + " " + selectedDistrict.value + " " + selectedTown.value;
-        values.value = [];
-        labels.value = [];
-        getWeather(filtered[0].xpos, filtered[0].ypos);
+        if(oldCity != newCity && oldCity) {
+          selectedDistrict.value = '';
+          selectedTown.value = '';
+        } else if(oldDistrict != newDistrict && oldDistrict) {
+          selectedTown.value = '';
+        } 
+        else {
+          var wildcard1 = getWildCars(selectedCity.value);
+          var wildcard2 = getWildCars(selectedDistrict.value);
+          var wildcard3 = getWildCars(selectedTown.value);
+          var filtered = positions.filter(pos => (matching(wildcard1, pos.first) && matching(wildcard2, pos.second) && matching(wildcard3, pos.three)));
+          addr.value = selectedCity.value + " " + selectedDistrict.value + " " + selectedTown.value;
+          values.value = [];
+          labels.value = [];
+          getWeather(filtered[0].xpos, filtered[0].ypos);
+        }
+       
       }
     });
 
