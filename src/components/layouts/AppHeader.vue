@@ -9,6 +9,9 @@
        a는 array의 값, i는 각 값의 인덱스
     -->
       <a v-for="(menu, idx) in menus" :key="idx" @click="menuAlert(idx)">{{ menu }}</a>
+      <span v-if="isAuth" class="spanT" @click="logout">logout</span>
+      <span v-if="!isAuth" class="spanT" @click="login">login</span>
+      <span v-if="isAuth" class="spanT">{{ getNick }} 님 환영합니다.</span>
     <!--
     <a>Home</a>
     <a>Products</a>
@@ -18,20 +21,56 @@
 </template>
 
 <script>
+import { useAuthStore } from '@/store/auth';
+import { computed } from 'vue';
+import { useRouter } from 'vue-router';
+
 export default {
     data() {
         return {
             menus : ['Home', 'Shop', 'Instagram', 'Post'],
         }
     },
+
     methods : {
       menuAlert(idx) {
         if(idx == 0) this.$router.push('/home');
         else if(idx == 1) this.$router.push('/rooms');
         else if(idx == 2) this.$router.push('/instagram');
         else if(idx == 3) this.$router.push('/post');
-      }
+      },
     },
+
+    setup() {
+      const authStore = useAuthStore();
+      const route = useRouter();
+
+      const isAuth = computed(() => {
+        const nowAuth = authStore.isAuth();
+        return nowAuth.token;
+      });
+
+      const getNick = computed(() => {
+        const nowAuth = authStore.isAuth();
+        return nowAuth.nickname;
+      })
+
+      const logout = (() => {
+        authStore.logout();
+        route.push('/login');
+      });
+
+      const login = (() => {
+        route.push('/login');
+      })
+
+      return {
+        isAuth,
+        getNick,
+        logout,
+        login,
+      }
+    }
 }
 </script>
 
@@ -45,5 +84,11 @@ export default {
 .menu a {
   color: white;
   padding: 10px;
+}
+
+.spanT {
+  float : right;
+  color: white;
+  padding-right: 15px;
 }
 </style>

@@ -4,10 +4,10 @@
         <h2>Login</h2>
         <form @submit.prevent="loginEmailPW">
             <div>
-            <input id="useremail" type="text" v-model="userEmail" placeholder="EMAIL"/>
+            <input class="inputBox" id="useremail" type="text" v-model="userEmail" placeholder="EMAIL"/>
             </div>
             <div>
-            <input id="userpw" type="password" v-model="userPw" placeholder="PW"/>
+            <input class="inputBox" id="userpw" type="password" v-model="userPw" placeholder="PW"/>
             </div>
             <button type="submit">로그인</button>
             <button @click="googleSignIn">구글로그인</button>
@@ -38,8 +38,8 @@ export default {
 
         const loginEmailPW = async () =>  {
             try {
-                await signInWithEmailAndPassword(auth, userEmail.value, userPw.value);
-                authStore.login();
+                const loginUser = await signInWithEmailAndPassword(auth, userEmail.value, userPw.value);
+                authStore.login(loginUser.user);
                 route.push('/post');
             } catch(error) {
                 errorMessage.value = error.message;
@@ -50,7 +50,7 @@ export default {
             const provider = new GoogleAuthProvider();
             try {
                 const result = await signInWithPopup(auth, provider);
-                authStore.login();
+                authStore.login(result.user);
                 console.log(result.user);
                 route.push('/post');
             } catch (error) {
@@ -109,6 +109,12 @@ p {
 .error {
     color : red;
     margin-top : 20px;
+}
+
+.inputBox {
+    border: 1px solid lightgray;
+    border-radius: 10px;
+    width: 40%;
 }
 
 </style>

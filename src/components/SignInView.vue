@@ -4,13 +4,16 @@
         <h2>Login</h2>
         <form @submit.prevent="signUpWithEmailPw">
             <div>
-                <input id="useremail" type="text" v-model="userEmail" placeholder="EMAIL"/>
+                <input class="inputBox" id="useremail" type="text" v-model="userEmail" placeholder="EMAIL"/>
             </div>
             <div>
-                <input id="userpw" type="password" v-model="userPw" placeholder="PW"/>
+                <input class="inputBox" id="userpw" type="password" v-model="userPw" placeholder="PW"/>
             </div>
             <div>
-                <input id="userpw2" type="password" v-model="userPw2" placeholder="PW check"/>
+                <input class="inputBox" id="userpw2" type="password" v-model="userPw2" placeholder="PW check"/>
+            </div>
+            <div>
+                <input class="inputBox" id="nickname" type="text" v-model="nickname" placeholder="NICKNAME">
             </div>
             <button type="submit">회원가입</button>
             <div :class="errorClass">{{ errorMessage }}</div>
@@ -22,7 +25,7 @@
 
 <script>
 import router from '@/router';
-import { createUserWithEmailAndPassword, getAuth } from 'firebase/auth';
+import { createUserWithEmailAndPassword, getAuth, updateProfile } from 'firebase/auth';
 import { computed, ref } from 'vue';
 
 
@@ -33,6 +36,7 @@ export default {
         const userEmail = ref('');
         const userPw = ref('');
         const userPw2 = ref('');
+        const nickname = ref('');
         const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
         const isValidEmail = computed(() => emailRegex.test(userEmail.value));
 
@@ -44,7 +48,11 @@ export default {
                 } else {
                     if(userEmail.value && isValidEmail.value && userPw.value && userPw2.value && userPw.value === userPw2.value) {
                         const assginedUser = await createUserWithEmailAndPassword(auth, userEmail.value, userPw.value);
-                        console.log(assginedUser);
+                        const user = assginedUser.user;
+                        await updateProfile(user, {
+                            displayName : nickname.value,
+                        });
+                        console.log(user.displayName);
                         router.push('/post');
                     }
                 }
@@ -59,6 +67,7 @@ export default {
             isValidEmail,
             userPw,
             userPw2,
+            nickname,
             signUpWithEmailPw
         };
     },

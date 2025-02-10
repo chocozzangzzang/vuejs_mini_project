@@ -14,21 +14,27 @@ import { defineStore } from "pinia";
 
 export const useAuthStore = defineStore('auth', {
     state : () => ({
-        token : null,
-        user  : null,
-        error : null,
+        token : '',
+        user  : '',
+        error : '',
     }),
     actions : {
-        login() {
+        login(user) {
             // 로그인 --> 서버로 보낸 정보를 store에 저장 //
-            this.token = "sample JWT token";
+            this.token = self.crypto.randomUUID();
+            this.user = user.displayName;
             // this.user = {username : "admin", nickname : "admin User"};
             // this.error = null;
         },
         logout() {
             // 로그아웃 -- 토큰 및 유저 정보 초기화 //
             this.token = null;
+            this.user = '';
+            this.error = '';
             // this.user  = null;
+        },
+        isAuth() {
+            return {token : !!this.token, nickname : this.user};
         }
     },
     // !!연산자 -> boolean 값으로 변환하는 연산자 //
