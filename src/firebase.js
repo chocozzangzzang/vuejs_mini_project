@@ -1,6 +1,7 @@
 import { initializeApp } from 'firebase/app';
 import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword } from 'firebase/auth';
 import { getFirestore } from 'firebase/firestore';
+import { getStorage } from 'firebase/storage';
 
 const firebaseConfig = {
     apiKey: process.env.VUE_APP_FIREBASE_API_KEY,
@@ -17,5 +18,6 @@ const firebaseApp = initializeApp(firebaseConfig);
 // Firebase 서비스 가져옴
 const auth = getAuth(firebaseApp);
 const db = getFirestore(firebaseApp);
+const firebaseStorage = getStorage(firebaseApp);
 
-export {firebaseApp, auth, db, signInWithEmailAndPassword, createUserWithEmailAndPassword};
+export {firebaseApp, auth, db, firebaseStorage, signInWithEmailAndPassword, createUserWithEmailAndPassword};

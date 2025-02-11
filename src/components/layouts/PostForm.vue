@@ -2,22 +2,22 @@
     <div class="container">
       <h1 class="title">게시글 작성</h1>
   
-      <form>
+      <form @submit.prevent="postSubmit"> 
         <!-- 제목 입력 -->
         <label for="title">제목</label>
-        <input type="text" id="title" class="input" required />
+        <input v-model="post.title" type="text" id="title" class="input" required />
   
         <!-- 내용 입력 -->
         <label for="content">내용</label>
-        <textarea id="content" class="textarea" required></textarea>
+        <textarea v-model="post.content" id="content" class="textarea" required></textarea>
   
         <!-- 이미지 업로드 -->
         <label for="image">이미지 업로드</label>
-        <input type="file" id="image" class="file-input" />
+        <input @change="handleImgInput" type="file" id="image" class="file-input" />
   
         <!-- 이미지 미리보기 -->
-        <div class="preview">
-          <img alt="미리보기" class="preview-img" />
+        <div v-if="imgUrl" class="preview">
+          <img :src="imgUrl" alt="미리보기" class="preview-img" />
         </div>
   
         <!-- 등록 버튼 -->
@@ -27,6 +27,66 @@
   </template>
   
 <script>
+import { computed, ref } from 'vue';
+import { db, firebaseStorage } from '@/firebase';
+import { collection, addDoc } from 'firebase/firestore';
+import { ref as storageRef, uploadBytes, getDownloadURL} from 'firebase/storage';
+import { useRouter } from 'vue-router';
+
+export default {
+
+  setup() {
+    const post = ref({
+      title : '',
+      content : '',
+      postImage : null,
+    })
+
+    const imagePreview = ref(null);
+    const router = useRouter();
+
+    const postSubmit = async () => {
+      if(!post.value.title && !post.value.content && !post.value.postImage) {
+        alert("빈 공간을 확인하시오!!!!");
+      } else {
+        const UUID = self.crypto.randomUUID();
+        const file_upload = await(uploadBytes(storageRef(firebaseStorage, `images/${UUID}`), post.value.postImage));
+        const file_url = await getDownloadURL(file_upload.ref);
+
+        await addDoc(collection(db, "posts"), {
+          title : post.value.title,
+          content : post.value.content,
+          imgUrl : file_url,
+          imgUUID : UUID,
+          fileName : post.value.postImage.name,
+        });
+        router.push('/post');
+      }
+    }
+
+    const imgUrl = computed(() => {
+      return imagePreview.value;
+    })
+
+    const handleImgInput = (event) => {
+      const nowFile = event.target.files[0];
+      if(nowFile) {
+        // console.log(nowFile);
+        post.value.postImage = nowFile;
+        imagePreview.value = URL.createObjectURL(nowFile);
+        // console.log(imagePreview.value);
+      }
+    }
+
+    return {
+      post,
+      postSubmit,
+      handleImgInput,
+      imgUrl,
+    }
+  }
+
+}
 </script>
   
 <style>
