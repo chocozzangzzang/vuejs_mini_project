@@ -6,6 +6,7 @@ import PostView from "@/components/PostView.vue";
 import { useAuthStore } from "@/store/auth";
 import LoginView from "@/components/LoginView.vue";
 import SignInView from "@/components/SignInView.vue";
+import PostForm from "@/components/layouts/PostForm.vue";
 
 const routes = [
     {
@@ -33,6 +34,12 @@ const routes = [
         name : "Posts",
         component : PostView,
         meta : { requireAuth : true },
+    },
+    {
+        path : '/postWrite',
+        name : 'postWrite',
+        component : PostForm,
+        meta : { requiredAuth : true },
     },
     {
         path : '/login',
