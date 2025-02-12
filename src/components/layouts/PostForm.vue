@@ -13,7 +13,7 @@
   
         <!-- 이미지 업로드 -->
         <label for="image">이미지 업로드</label>
-        <input @change="handleImgInput" type="file" id="image" class="file-input" />
+        <input @change="handleImgInput" type="file" id="image" class="file-input"/>
   
         <!-- 이미지 미리보기 -->
         <div v-if="imgUrl" class="preview">
@@ -32,6 +32,7 @@ import { db, firebaseStorage } from '@/firebase';
 import { collection, addDoc } from 'firebase/firestore';
 import { ref as storageRef, uploadBytes, getDownloadURL} from 'firebase/storage';
 import { useRouter } from 'vue-router';
+import { useAuthStore } from '@/store/auth';
 
 export default {
 
@@ -46,20 +47,42 @@ export default {
     const router = useRouter();
 
     const postSubmit = async () => {
-      if(!post.value.title && !post.value.content && !post.value.postImage) {
-        alert("빈 공간을 확인하시오!!!!");
+      if(!post.value.title ||  !post.value.content) {
+        alert("입력되지 않은 칸이 있습니다");
       } else {
-        const UUID = self.crypto.randomUUID();
-        const file_upload = await(uploadBytes(storageRef(firebaseStorage, `images/${UUID}`), post.value.postImage));
-        const file_url = await getDownloadURL(file_upload.ref);
+        
+        const today = new Date();
+        const formattedDate = today.toLocaleString();
+        const authStore = useAuthStore();
+        const nowUser = authStore.getNickname();
 
-        await addDoc(collection(db, "posts"), {
-          title : post.value.title,
-          content : post.value.content,
-          imgUrl : file_url,
-          imgUUID : UUID,
-          fileName : post.value.postImage.name,
-        });
+        if(post.value.postImage) {
+          const UUID = self.crypto.randomUUID();
+          const file_upload = await(uploadBytes(storageRef(firebaseStorage, `images/${UUID}`), post.value.postImage));
+          const file_url = await getDownloadURL(file_upload.ref);
+          await addDoc(collection(db, "posts"), {
+            title : post.value.title,
+            content : post.value.content,
+            writer : nowUser,
+            imgUrl : file_url,
+            imgUUID : UUID,
+            registDate : formattedDate,
+            modifyDate : formattedDate,
+            fileName : post.value.postImage.name,
+          });
+        } else {
+          await addDoc(collection(db, "posts"), {
+            title : post.value.title,
+            content : post.value.content,
+            writer : nowUser,
+            imgUrl : '',
+            imgUUID : '',
+            registDate : formattedDate,
+            modifyDate : formattedDate,
+            fileName : '',
+          });
+        }
+        
         router.push('/post');
       }
     }

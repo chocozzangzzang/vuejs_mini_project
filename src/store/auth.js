@@ -13,33 +13,31 @@
 import { defineStore } from "pinia";
 
 export const useAuthStore = defineStore('auth', {
-    state : () => ({
-        token : '',
-        user  : '',
-        error : '',
-    }),
+    state() {
+        return {
+            nowUser : JSON.parse(localStorage.getItem('nowUser')) || {}
+        }
+    },
     actions : {
         login(user) {
             // 로그인 --> 서버로 보낸 정보를 store에 저장 //
-            this.token = self.crypto.randomUUID();
-            this.user = user.displayName;
+            const token = self.crypto.randomUUID();
+            const nick = user.displayName;
+            const nowUser = {token : token, nick : nick};
+            localStorage.setItem('nowUser', JSON.stringify(nowUser));
             // this.user = {username : "admin", nickname : "admin User"};
             // this.error = null;
         },
         logout() {
             // 로그아웃 -- 토큰 및 유저 정보 초기화 //
-            this.token = null;
-            this.user = '';
-            this.error = '';
+            localStorage.removeItem('user');
             // this.user  = null;
         },
-        isAuth() {
-            return {token : !!this.token, nickname : this.user};
-        }
     },
     // !!연산자 -> boolean 값으로 변환하는 연산자 //
     // null이면 false, 값이 존재하면 true를 반환함 //
     getters : {
-        isAuthenticated : (state) => !!state.token,
+        isAuth : (state) => !!state.nowUser.token,
+        getNick : (state) => state.nowUser.nick,
     },
 });

@@ -7,6 +7,7 @@ import { useAuthStore } from "@/store/auth";
 import LoginView from "@/components/LoginView.vue";
 import SignInView from "@/components/SignInView.vue";
 import PostForm from "@/components/layouts/PostForm.vue";
+import PostDetail from "@/components/layouts/PostDetail.vue";
 
 const routes = [
     {
@@ -42,6 +43,15 @@ const routes = [
         meta : { requiredAuth : true },
     },
     {
+        path : '/postDetails',
+        name : 'postDetails',
+        component : PostDetail,
+        meta : {
+            requiredAuth : true,
+
+        }
+    },
+    {
         path : '/login',
         name : 'Login',
         component : LoginView,
@@ -64,7 +74,7 @@ router.beforeEach((to, from, next) => {
     // 인증 허용 x //
     // 1. meta의 requireAuth가 true인가 //
     // 2. store를 통해 받아온 isAuthenticated가 false인가 //
-    if(to.meta.requireAuth && !authStore.isAuthenticated) {
+    if(to.meta.requireAuth && !authStore.isAuth) {
         next('/login');
     } else {
         next();

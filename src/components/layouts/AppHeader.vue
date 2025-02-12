@@ -8,7 +8,7 @@
        이때 in 안에 (a, i)까지 변수로 설정할 수 있음.
        a는 array의 값, i는 각 값의 인덱스
     -->
-      <a v-for="(menu, idx) in menus" :key="idx" @click="menuAlert(idx)">{{ menu }}</a>
+      <a class="center" v-for="(menu, idx) in menus" :key="idx" @click="menuAlert(idx)">{{ menu }}</a>
       <span v-if="isAuth" class="spanT" @click="logout">logout</span>
       <span v-if="!isAuth" class="spanT" @click="login">login</span>
       <span v-if="isAuth" class="spanT">{{ getNick }} 님 환영합니다.</span>
@@ -46,13 +46,11 @@ export default {
       const route = useRouter();
 
       const isAuth = computed(() => {
-        const nowAuth = authStore.isAuth();
-        return nowAuth.token;
+        return authStore.isAuth;
       });
 
       const getNick = computed(() => {
-        const nowAuth = authStore.isAuth();
-        return nowAuth.nickname;
+        return authStore.getNick;
       })
 
       const logout = (() => {
@@ -90,5 +88,10 @@ export default {
   float : right;
   color: white;
   padding-right: 15px;
+}
+
+.center {
+  justify-content: center; /* 가로 중앙 정렬 */
+  align-items: center; /* 세로 중앙 정렬 */
 }
 </style>

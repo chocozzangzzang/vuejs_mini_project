@@ -51,7 +51,7 @@ export default {
             try {
                 const result = await signInWithPopup(auth, provider);
                 authStore.login(result.user);
-                console.log(result.user);
+                // console.log(result.user);
                 route.push('/post');
             } catch (error) {
                 console.log(error);
