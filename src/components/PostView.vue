@@ -16,6 +16,7 @@ import { computed, ref } from 'vue';
 import { db } from '../firebase.js';
 import { getDocs, collection, query, orderBy } from 'firebase/firestore';
 import { onMounted } from 'vue';
+import { postStore } from '@/store/post';
 
 export default {
     components : {
@@ -35,6 +36,7 @@ export default {
     setup() {
 
         const router = useRouter();
+        const postStr = postStore();
         const postWrite = () => {
             router.push('/postWrite');
         }
@@ -42,18 +44,21 @@ export default {
         const posts = ref(null);
         const getPosts = computed(() => {
             return posts.value;
-        });
+        })
 
         onMounted(async () => {
             try{
+                postStr.clearPost();
                 const docRef = query(collection(db, "posts"), orderBy('registDate', 'desc'));
                 // console.log(docRef);
                 const postSnaps = await getDocs(docRef);
-                // console.log(postSnaps);
-                var idx = 0;
+                console.log("---mounted---");
+                console.log(getPosts);
                 if(postSnaps.docs.length >= 1) {
+                    console.log(postSnaps.docs);
                     posts.value = postSnaps.docs.map(doc => ({
-                        id : ++idx,
+                        docid : doc.id,
+                        postid : doc.postid,
                         ...doc.data() 
                     }));
                 }
@@ -63,9 +68,37 @@ export default {
             }            
         })
 
+        // const getData = computed(() => {
+        //     return getPostFromFirebase;
+        // })
+
+        // const getPostFromFirebase = async() => {
+        //     try{
+        //         const docRef = query(collection(db, "posts"), orderBy('registDate', 'desc'));
+        //         // console.log(docRef);
+        //         const postSnaps = await getDocs(docRef);
+        //         // console.log(postSnaps.docs);
+        //         if(postSnaps.docs.length >= 1) {
+        //             console.log(postSnaps.docs);
+        //             const posts = ref(null);
+        //             posts.value = postSnaps.docs.map(doc => ({
+        //                 docid : doc.id,
+        //                 postid : doc.postid,
+        //                 ...doc.data() 
+        //             }));
+        //             return posts.value;
+        //         }
+        //         // console.log(posts.value);
+        //     } catch(error) {
+        //         console.log(error);
+        //     }  
+        // }
+
         return {
             postWrite,
             getPosts,
+            // getData,
+            // getPostFromFirebase,
         };
     },
 }

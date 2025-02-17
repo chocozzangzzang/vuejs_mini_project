@@ -27,10 +27,12 @@ export const useAuthStore = defineStore('auth', {
             localStorage.setItem('nowUser', JSON.stringify(nowUser));
             // this.user = {username : "admin", nickname : "admin User"};
             // this.error = null;
+            this.nowUser = nowUser;
         },
         logout() {
             // 로그아웃 -- 토큰 및 유저 정보 초기화 //
-            localStorage.removeItem('user');
+            localStorage.removeItem('nowUser');
+            this.nowUser = {};
             // this.user  = null;
         },
     },

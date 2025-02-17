@@ -3,7 +3,7 @@ import { defineStore } from 'pinia';
 export const postStore = defineStore('post', {
   state() {
     return {
-      post: null,
+      post: {},
     };
   },
 
@@ -14,7 +14,7 @@ export const postStore = defineStore('post', {
     },
     clearPost() {
       localStorage.removeItem('postdetail');
-      this.post = null;
+      this.post = {};
     },
   },
   getters: {

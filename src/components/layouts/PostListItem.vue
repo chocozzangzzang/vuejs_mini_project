@@ -1,7 +1,7 @@
 <template>
   <li v-for="(post, idx) in posts" :key="idx" class="postItem" @click="getDetail(post)">
     <a href="#" class="postDetail">
-        <span class="postNumber">{{ post.id }}</span>
+        <span class="postNumber">{{ post.postid }}</span>
         <span class="postIcon">
             <i :class="post.imgUrl? 'mdi mdi-image' : 'mdi mdi-image-off'"></i>
         </span>

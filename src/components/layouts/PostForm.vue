@@ -54,7 +54,7 @@ export default {
         const today = new Date();
         const formattedDate = today.toLocaleString();
         const authStore = useAuthStore();
-        const nowUser = authStore.getNickname();
+        const nowUser = authStore.getNick;
 
         if(post.value.postImage) {
           const UUID = self.crypto.randomUUID();
@@ -69,6 +69,7 @@ export default {
             registDate : formattedDate,
             modifyDate : formattedDate,
             fileName : post.value.postImage.name,
+            comments : [],
           });
         } else {
           await addDoc(collection(db, "posts"), {
@@ -80,6 +81,7 @@ export default {
             registDate : formattedDate,
             modifyDate : formattedDate,
             fileName : '',
+            commments : [],
           });
         }
         
