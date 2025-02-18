@@ -29,7 +29,7 @@
 <script>
 import { computed, ref } from 'vue';
 import { db, firebaseStorage } from '@/firebase';
-import { collection, addDoc } from 'firebase/firestore';
+import { collection, addDoc, getDocs } from 'firebase/firestore';
 import { ref as storageRef, uploadBytes, getDownloadURL} from 'firebase/storage';
 import { useRouter } from 'vue-router';
 import { useAuthStore } from '@/store/auth';
@@ -56,11 +56,17 @@ export default {
         const authStore = useAuthStore();
         const nowUser = authStore.getNick;
 
+        const numOfPoSts = ref(0);
+        await getDocs(collection(db, "posts")).then((snapshot) => {
+          numOfPoSts.value = snapshot.docs.length;
+        })
+
         if(post.value.postImage) {
           const UUID = self.crypto.randomUUID();
           const file_upload = await(uploadBytes(storageRef(firebaseStorage, `images/${UUID}`), post.value.postImage));
           const file_url = await getDownloadURL(file_upload.ref);
           await addDoc(collection(db, "posts"), {
+            postid : numOfPoSts.value + 1,
             title : post.value.title,
             content : post.value.content,
             writer : nowUser,
@@ -73,6 +79,7 @@ export default {
           });
         } else {
           await addDoc(collection(db, "posts"), {
+            postid : numOfPoSts.value + 1,
             title : post.value.title,
             content : post.value.content,
             writer : nowUser,
@@ -81,7 +88,7 @@ export default {
             registDate : formattedDate,
             modifyDate : formattedDate,
             fileName : '',
-            commments : [],
+            comments : [],
           });
         }
         

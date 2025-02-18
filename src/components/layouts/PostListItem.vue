@@ -10,11 +10,16 @@
             <span class="postWriter">{{ post.writer }}</span>
             <span class="postRegDate">{{ post.registDate }}</span>
         </div>
+        <div class="actions">
+            <button v-if="isWriter(post.writer)">✏️수정</button>
+            <button v-if="isWriter(post.writer)">🗑️삭제</button>
+        </div>
     </a>
   </li>
 </template>
 
 <script>
+import { useAuthStore } from '@/store/auth';
 import { postStore } from '@/store/post';
 
 export default {
@@ -24,6 +29,11 @@ export default {
         getDetail(post) {
             postStore().setPost(post);
             this.$router.push('/postDetails');
+        },
+        isWriter(nickname) {
+          const auth = useAuthStore();
+          const nowUser = auth.getNick;
+          return nowUser === nickname;
         }
     }
 }
@@ -92,6 +102,16 @@ export default {
   font-size: 20px;
   margin-right: 10px;
   color: #555;
+}
+
+.actions {
+  display: flex;
+  gap: 5px;
+  justify-content : flex-end;
+}
+
+button {
+  white-space : nowrap;
 }
 
 

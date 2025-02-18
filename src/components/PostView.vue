@@ -1,5 +1,5 @@
 <template>
-    <button class="postButton" @click="postWrite"><i class="mdi mdi-pencil"></i>게시글 등록</button>
+    <button class="postButton" @click="postWrite"><i class="mdi mdi-pencil"></i>등록</button>
     <div class="container">
         <h1 class="title">게시글 목록</h1>
         <ul class="postList">
@@ -52,8 +52,6 @@ export default {
                 const docRef = query(collection(db, "posts"), orderBy('registDate', 'desc'));
                 // console.log(docRef);
                 const postSnaps = await getDocs(docRef);
-                console.log("---mounted---");
-                console.log(getPosts);
                 if(postSnaps.docs.length >= 1) {
                     console.log(postSnaps.docs);
                     posts.value = postSnaps.docs.map(doc => ({
@@ -104,10 +102,13 @@ export default {
 }
 </script>
   
-<style>
+<style scoped>
 /* 버튼 */
 /* 버튼 기본 스타일 */
 .postButton {
+  white-space: nowrap;
+  margin-bottom : 10px;
+  width : 100px;
   background-color: #4CAF50; /* 초록색 배경 */
   color: white; /* 흰색 글자 */
   padding: 12px 24px; /* 패딩 추가 */
