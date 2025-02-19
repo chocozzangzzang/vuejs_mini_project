@@ -8,7 +8,7 @@
         <p class="detail">{{ com.text }}</p>
         <div class="actions">
             <button v-if="isWriter(com.nickname)">✏️수정</button>
-            <button v-if="isWriter(com.nickname)">🗑️삭제</button>
+            <button v-if="isWriter(com.nickname)" @click="deleteComm(idx)">🗑️삭제</button>
         </div>
     </div>
   </div>
@@ -41,6 +41,11 @@ export default {
         isWriter(nickname) {
             const auth = useAuthStore();
             return auth.getNick === nickname;
+        },
+
+        deleteComm(idx) {
+            // console.log(`Child : ${idx}`);
+            this.$emit('deleteIdx', idx);
         }
     },
 }

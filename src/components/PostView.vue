@@ -3,7 +3,7 @@
     <div class="container">
         <h1 class="title">게시글 목록</h1>
         <ul class="postList">
-            <post-list-item :posts="getPosts" />
+            <post-list-item :posts="getPosts" @deleteIdx="deletePost"/>
         </ul>
     </div>
 </template>
@@ -14,7 +14,7 @@ import { useRouter } from 'vue-router';
 import PostListItem from './layouts/PostListItem.vue';
 import { computed, ref } from 'vue';
 import { db } from '../firebase.js';
-import { getDocs, collection, query, orderBy } from 'firebase/firestore';
+import { doc, getDocs, collection, query, orderBy, deleteDoc, updateDoc, } from 'firebase/firestore';
 import { onMounted } from 'vue';
 import { postStore } from '@/store/post';
 
@@ -46,6 +46,36 @@ export default {
             return posts.value;
         })
 
+        const deletePost = async(idx) => {
+            const updatedPosts = ref([]);
+            var postidx = 1;
+            posts.value.forEach(post => {
+                if((post.postid - 1) != idx) {
+                    post.postid = postidx
+                    postidx += 1;
+                    updatedPosts.value.push(post);
+                }
+            });
+            // console.log(updatedPosts.value);
+            const docRef = query(collection(db, "posts"), orderBy('registDate', 'desc'));
+            const postSnaps = await getDocs(docRef);
+            // var updatePostidx = 1;
+            var totalLength = postSnaps.docs.length;
+            var updateLength = totalLength - 1;
+            // console.log(totalLength, idx); 
+            for (const docu of postSnaps.docs) {
+                if((docu.data().postid) == (totalLength - idx)) {
+                    await deleteDoc(doc(db, 'posts', docu.id));
+                } else {
+                    await updateDoc(doc(db, 'posts', docu.id), {
+                        postid : updateLength,
+                    });
+                    updateLength -= 1;
+                }
+            }
+            posts.value = updatedPosts.value;
+        }
+
         onMounted(async () => {
             try{
                 postStr.clearPost();
@@ -53,7 +83,7 @@ export default {
                 // console.log(docRef);
                 const postSnaps = await getDocs(docRef);
                 if(postSnaps.docs.length >= 1) {
-                    console.log(postSnaps.docs);
+                    // console.log(postSnaps.docs);
                     posts.value = postSnaps.docs.map(doc => ({
                         docid : doc.id,
                         postid : doc.postid,
@@ -95,6 +125,7 @@ export default {
         return {
             postWrite,
             getPosts,
+            deletePost,
             // getData,
             // getPostFromFirebase,
         };

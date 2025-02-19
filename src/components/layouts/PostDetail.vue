@@ -24,7 +24,7 @@
 
     <div class="commentDiv">
         <h3>댓글 {{ post.comments.length }}</h3>
-        <comment-content :comm="post.comments" />
+        <comment-content :comm="post.comments" @deleteIdx="deleteComment" />
         
         <div class="newcomment">
             <textarea v-model="newComment" placeholder="댓글을 입력하세요..."></textarea>
@@ -41,7 +41,7 @@ import { useRouter } from 'vue-router';
 import { db } from '@/firebase';
 import CommentContent from './CommentContent.vue';
 import { computed, ref } from 'vue';
-import { arrayUnion, doc, getDoc, updateDoc } from 'firebase/firestore';
+import { arrayUnion, doc, updateDoc } from 'firebase/firestore';
 import { useAuthStore } from '@/store/auth';
 
 export default {
@@ -92,6 +92,9 @@ export default {
                     comments : arrayUnion(newCom),
                 }).then(() => {
                     newComment.value = '';
+                    post.value.comments = [...post.value.comments, newCom];
+                    poststore.setPost(post.value);
+                    /*                    
                     try {
                         const docRef = doc(db, 'posts', post.value.docid);
                         getDoc(docRef).then((doc) => {
@@ -101,13 +104,45 @@ export default {
                     } catch(error) {
                         console.log(error);
                     }
+                    */
                 });
             }
+        }
+
+        const deleteComment = async(idx) => {
+            console.log(`In Parent : ${idx}`);
+            var commentid = 1;
+            const updatedComments = ref([]);
+            console.log(post.value.comments);
+            post.value.comments.forEach(comment => {
+                console.log(`${comment.id} -- ${idx}`);
+                if((comment.id - 1) != idx) {
+                    const newCom = {
+                        id : commentid,
+                        date : comment.date,
+                        likes : comment.likes,
+                        nickname : comment.nickname,
+                        text : comment.text,
+                    }
+                    updatedComments.value.push(newCom);
+                    commentid += 1;
+                }
+            });
+            console.log(updatedComments.value);
+            
+            const docRef = doc(db, "posts", post.value.docid);
+            await updateDoc(docRef, {
+                comments : updatedComments.value,
+            }).then(() => {
+                post.value.comments = updatedComments.value;
+                poststore.setPost(post.value);
+            })
         }
 
         return {
             backToPost,
             commentSubmit,
+            deleteComment,
             formatDate,
             post,
             newComment,

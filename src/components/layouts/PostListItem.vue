@@ -12,7 +12,7 @@
         </div>
         <div class="actions">
             <button v-if="isWriter(post.writer)">✏️수정</button>
-            <button v-if="isWriter(post.writer)">🗑️삭제</button>
+            <button v-if="isWriter(post.writer)" @click="deletePost($event, idx)">🗑️삭제</button>
         </div>
     </a>
   </li>
@@ -34,6 +34,10 @@ export default {
           const auth = useAuthStore();
           const nowUser = auth.getNick;
           return nowUser === nickname;
+        },
+        deletePost(event, idx) {
+          event.stopPropagation();
+          this.$emit('deleteIdx', idx);
         }
     }
 }
