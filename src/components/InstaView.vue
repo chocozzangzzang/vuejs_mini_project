@@ -30,8 +30,10 @@ export default {
 .center-align {
   width : 50%;
   margin: 0 auto;
+  margin-top : 20px;
   text-align: center;     /* 내부 텍스트 중앙 정렬 (옵션) */
   padding: 20px;
   border: 1px solid lightgray;
+  border-radius: 8px;
 }
 </style>

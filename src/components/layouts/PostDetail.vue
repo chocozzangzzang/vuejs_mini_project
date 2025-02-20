@@ -176,6 +176,10 @@ export default {
 .commentDiv {
     max-width: 600px;
     margin : 20px auto;
+    background-color : #f9f9f9;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    padding : 20px;
 }
 
 .newcomment {

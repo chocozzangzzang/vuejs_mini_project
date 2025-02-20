@@ -94,6 +94,7 @@ export default {
   display: flex;
   gap: 5px;
   justify-content : flex-end;
+  padding-bottom: 5px;
 }
 
 .newComment {
