@@ -1,15 +1,19 @@
 <template>
   <div v-for="(com, idx) in comm" :key="idx" class="comment">
-    <div class="content">
+    <div v-if="modifyIndex !== idx">
         <div class="info">
             <span class="nickname">{{ com.nickname }}</span>
             <span class="date">{{ com.date }}</span>
         </div>
         <p class="detail">{{ com.text }}</p>
         <div class="actions">
-            <button v-if="isWriter(com.nickname)">✏️수정</button>
+            <button v-if="isWriter(com.nickname)" @click="modifyComm(idx)">✏️수정</button>
             <button v-if="isWriter(com.nickname)" @click="deleteComm(idx)">🗑️삭제</button>
         </div>
+    </div>
+    <div class="newComment" v-else>
+        <textarea v-model="modifyComment" placeholder="수정할 댓글을 입력하세요..."></textarea>
+        <button @click="modify">수정</button>
     </div>
   </div>
 </template>
@@ -23,7 +27,8 @@ export default {
     data() {
         return {
             newComment : '',
-
+            modifyIndex : null,
+            modifyComment : '',
         }
     },
 
@@ -46,6 +51,17 @@ export default {
         deleteComm(idx) {
             // console.log(`Child : ${idx}`);
             this.$emit('deleteIdx', idx);
+        },
+        
+        modifyComm(idx) {
+            if(!this.modifyIndex) {this.modifyIndex = idx;}
+            else alert("수정 중인 댓글이 있습니다!!!!");
+        },
+        
+        modify() {
+            alert(`${this.modifyComment}`);
+            this.modifyIndex = null;
+            this.modifyComment = '';
         }
     },
 }
@@ -53,18 +69,14 @@ export default {
 
 <style scoped>
 .comment {
-    display : flex;
+    max-width: 600px;
     align-items : flex-start;
-    padding : 10px;
     border-bottom : 1px solid #ddd;
-}
-
-.content {
-    flex : 1;
+    margin: 20px auto;
 }
 
 .info {
-    display : flex;
+    display: flex;
     justify-content : space-between;
     font-size : 14px;
     color : #777;
@@ -82,5 +94,28 @@ export default {
   display: flex;
   gap: 5px;
   justify-content : flex-end;
+}
+
+.newComment {
+  display : flex;
+  margin : 20px auto;
+}
+
+.newComment textarea {
+  flex: 1;
+  height: 60px;
+  padding: 5px;
+  border: 1px solid #ddd;
+  border-radius: 5px;
+}
+
+.newComment button {
+  margin-left: 5px;
+  padding: 5px 10px;
+  background: 	#D3D3D3;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
 }
 </style>
