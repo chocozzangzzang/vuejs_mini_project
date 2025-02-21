@@ -52,9 +52,7 @@ export default {
         if(posts.value[idx].imgUrl) {
             const storage = getStorage();
             const imgRef = storageRef(storage, `/images/${posts.value[idx].imgUUID}`);
-            await deleteObject(imgRef).then(() => {
-              console.log("이미지가 삭제됨");
-            })
+            await deleteObject(imgRef);
           }
             const updatedPosts = ref([]);
             var postidx = 1;
