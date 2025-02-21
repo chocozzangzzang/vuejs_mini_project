@@ -84,7 +84,7 @@ export default {
 }
 
 body {
-  margin : 0
+  margin : 0;
 }
 
 </style>

@@ -17,6 +17,7 @@ import { db } from '../firebase.js';
 import { doc, getDocs, collection, query, orderBy, deleteDoc, updateDoc, } from 'firebase/firestore';
 import { onMounted } from 'vue';
 import { postStore } from '@/store/post';
+import { ref as storageRef, deleteObject, getStorage } from 'firebase/storage';
 
 export default {
     components : {
@@ -47,6 +48,14 @@ export default {
         })
 
         const deletePost = async(idx) => {
+
+        if(posts.value[idx].imgUrl) {
+            const storage = getStorage();
+            const imgRef = storageRef(storage, `/images/${posts.value[idx].imgUUID}`);
+            await deleteObject(imgRef).then(() => {
+              console.log("이미지가 삭제됨");
+            })
+          }
             const updatedPosts = ref([]);
             var postidx = 1;
             posts.value.forEach(post => {

@@ -8,6 +8,7 @@ import LoginView from "@/components/LoginView.vue";
 import SignInView from "@/components/SignInView.vue";
 import PostForm from "@/components/layouts/PostForm.vue";
 import PostDetail from "@/components/layouts/PostDetail.vue";
+import PostModify from "@/components/layouts/PostModify.vue";
 
 const routes = [
     {
@@ -49,6 +50,14 @@ const routes = [
         meta : {
             requiredAuth : true,
 
+        }
+    },
+    {
+        path : '/postModify',
+        name : 'postModify',
+        component : PostModify,
+        meta : {
+            requiredAuth : true,
         }
     },
     {

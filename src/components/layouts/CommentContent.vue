@@ -3,7 +3,7 @@
     <div v-if="modifyIndex !== idx">
         <div class="info">
             <span class="nickname">{{ com.nickname }}</span>
-            <span class="date">{{ com.date }}</span>
+            <span class="date">{{ com.date }} <span v-if="com.modified"> (수정됨)</span> </span>
         </div>
         <p class="detail">{{ com.text }}</p>
         <div class="actions">
@@ -27,7 +27,7 @@ export default {
     data() {
         return {
             newComment : '',
-            modifyIndex : null,
+            modifyIndex : -1,
             modifyComment : '',
         }
     },
@@ -54,14 +54,23 @@ export default {
         },
         
         modifyComm(idx) {
-            if(!this.modifyIndex) {this.modifyIndex = idx;}
+            if(this.modifyIndex == -1) {this.modifyIndex = idx;}
             else alert("수정 중인 댓글이 있습니다!!!!");
         },
         
         modify() {
-            alert(`${this.modifyComment}`);
-            this.modifyIndex = null;
-            this.modifyComment = '';
+            if(!this.modifyComment) {
+                if(confirm("입력 칸이 비어있습니다. 수정하지 않으시겠습니까?")) {
+                    this.modifyIndex = -1;
+                    this.modifyComment = '';
+                }
+            }
+            else {
+                const modiComm = {idx : this.modifyIndex, com : this.modifyComment};
+                this.modifyIndex = -1;
+                this.modifyComment = '';
+                this.$emit("modify", modiComm);
+            }
         }
     },
 }

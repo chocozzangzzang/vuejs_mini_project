@@ -1,47 +1,55 @@
 <template>
-  <h3>기상 예보</h3>
-  <p v-if="allDatas">현재 날씨 : {{ this.allDatas.datasets[0].data[0] }} ℃</p>
-  <p v-if="getCurrAddr">{{ getCurrAddr }}의 날씨</p>
-  <button @click="getCurrentPosition">현재위치</button>
-  <v-container>
-    <div class="selects-inline">
-      <v-select
-          v-model="selectedCity"
-          :items="getCities"
-          item-value="name"
-          item-title="name"
-          label="시/도"
-          class="selectBox"
-          dense
-        >
-        </v-select>
-        <v-select
-          v-model="selectedDistrict"
-          :items="getDistricts"
-          label="군/구"
-          item-value="name"
-          item-title="name"
-          class="selectBox"
-          dense
-        >
-        </v-select>
-        <v-select
-          v-model="selectedTown"
-          :items="getTowns"
-          item-value="name"
-          item-title="name"
-          label="읍/면/동"
-          class="selectBox"
-          dense
-        >
-        </v-select>
+  <div class="homepage">
+    <div class="item">
+      <h3>기상 예보</h3>
     </div>
-  </v-container>
-  <line-chart v-if="allDatas"
-  :temperData="allDatas"
-  :chartOption="chartOptions"
-  height="20" width="50">
-  </line-chart>
+    <div class="item">
+      <p v-if="allDatas">현재 날씨 : {{ this.allDatas.datasets[0].data[0] }} ℃</p>
+    </div>
+    <div class="item">
+      <p v-if="getCurrAddr">{{ getCurrAddr }}의 날씨</p>
+      <button @click="getCurrentPosition">현재위치</button>
+    </div>
+    <v-container>
+      <div class="selects-inline">
+        <v-select
+            v-model="selectedCity"
+            :items="getCities"
+            item-value="name"
+            item-title="name"
+            label="시/도"
+            class="selectBox"
+            dense
+          >
+          </v-select>
+          <v-select
+            v-model="selectedDistrict"
+            :items="getDistricts"
+            label="군/구"
+            item-value="name"
+            item-title="name"
+            class="selectBox"
+            dense
+          >
+          </v-select>
+          <v-select
+            v-model="selectedTown"
+            :items="getTowns"
+            item-value="name"
+            item-title="name"
+            label="읍/면/동"
+            class="selectBox"
+            dense
+          >
+          </v-select>
+      </div>
+    </v-container>
+    <line-chart v-if="allDatas"
+    :temperData="allDatas"
+    :chartOption="chartOptions"
+    height="20" width="50">
+    </line-chart>
+  </div>
 </template>
 
 <script>
@@ -326,6 +334,20 @@ export default {
 </script>
 
 <style scoped>
+.homepage {
+  max-width: 1000px;
+  margin-top: 20px;
+  padding : 20px;
+  display : flex;
+  flex-direction: column;
+  margin: 0 auto;
+  background-color: #f9f9f9;;
+}
+
+.item {
+  flex : 1;
+}
+
 .selects-inline {
   display: flex;               /* Flexbox 사용 */
   justify-content: center;     /* 수평 가운데 정렬 */

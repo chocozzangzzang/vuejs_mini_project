@@ -11,7 +11,7 @@
             <span class="postRegDate">{{ post.registDate }}</span>
         </div>
         <div class="actions">
-            <button v-if="isWriter(post.writer)">✏️수정</button>
+            <button v-if="isWriter(post.writer)" @click="modifyPost($event, idx)">✏️수정</button>
             <button v-if="isWriter(post.writer)" @click="deletePost($event, idx)">🗑️삭제</button>
         </div>
     </a>
@@ -38,6 +38,11 @@ export default {
         deletePost(event, idx) {
           event.stopPropagation();
           this.$emit('deleteIdx', idx);
+        },
+        modifyPost(event, idx) {
+          event.stopPropagation();
+          postStore().setPost(this.posts[idx]);
+          this.$router.push('/postModify');
         }
     }
 }

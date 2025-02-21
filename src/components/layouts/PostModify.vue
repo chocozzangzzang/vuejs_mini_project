@@ -1,42 +1,57 @@
 <template>
     <div class="container">
-      <h1 class="title">게시글 작성</h1>
-  
-      <form @submit.prevent="postSubmit"> 
+      <h1 class="title">게시글 수정</h1>
+      <form @submit.prevent="postModi"> 
         <!-- 제목 입력 -->
         <label for="title">제목</label>
-        <input v-model="post.title" type="text" id="title" class="input" required />
+        <input v-model="post.title" type="text" id="title" class="input" required/>
   
         <!-- 내용 입력 -->
         <label for="content">내용</label>
         <textarea v-model="post.content" id="content" class="textarea" required></textarea>
   
         <!-- 이미지 업로드 -->
-        <label for="image">이미지 업로드</label>
+        <label for="image">이미지 수정</label>
         <input @change="handleImgInput" type="file" id="image" class="file-input"/>
   
         <!-- 이미지 미리보기 -->
-        <div v-if="imgUrl" class="preview">
-          <img :src="imgUrl" alt="미리보기" class="preview-img" />
+        <div v-if="imgUrl">
+            <img :src="imgUrl" alt="미리보기" class="preview-img" />
         </div>
+        <div v-else>
+            <div v-if="post.postImage" class="preview">
+                <label for="nowImage">기존 이미지</label>
+                <img :src="post.postImage" alt="미리보기" class="preview-img"/>
+            </div>
+            <div>
+                <p>이미지가 없는 게시글입니다.</p>
+            </div>
+        </div>
+        
   
         <!-- 등록 버튼 -->
-        <button type="submit" class="submit-btn">등록</button>
+        <button type="submit" class="submit-btn">수정</button>
       </form>
     </div>
   </template>
   
 <script>
-import { computed, ref } from 'vue';
+import { computed, onMounted, ref } from 'vue';
 import { db, firebaseStorage } from '@/firebase';
-import { collection, addDoc, getDocs } from 'firebase/firestore';
-import { ref as storageRef, uploadBytes, getDownloadURL} from 'firebase/storage';
+import { doc, updateDoc } from 'firebase/firestore';
+import { ref as storageRef, getStorage, uploadBytes, getDownloadURL, deleteObject} from 'firebase/storage';
 import { useRouter } from 'vue-router';
-import { useAuthStore } from '@/store/auth';
+import { postStore } from '@/store/post';
 
 export default {
 
   setup() {
+    const getPost = computed(() => {
+        return postStore().getPost;
+    })
+
+    const nowPost = ref(null);
+
     const post = ref({
       title : '',
       content : '',
@@ -44,59 +59,67 @@ export default {
     })
 
     const imagePreview = ref(null);
+    const imgUrl = computed(() => {
+      return imagePreview.value;
+    })
+
     const router = useRouter();
 
     const formatDate = (date) => {
-        return new Intl.DateTimeFormat('ko-KR', {
-            year : 'numeric',
-            month : '2-digit',
-            day : '2-digit',
-            hour : '2-digit',
-            minute : '2-digit',
-        }).format(date);
-      }
+            return new Intl.DateTimeFormat('ko-KR', {
+                year : 'numeric',
+                month : '2-digit',
+                day : '2-digit',
+                hour : '2-digit',
+                minute : '2-digit',
+            }).format(date);
+        }
 
-    const postSubmit = async () => {
+    onMounted(() => {
+        nowPost.value = getPost.value;
+        post.value.title = nowPost.value.title;
+        post.value.content = nowPost.value.content;
+        post.value.postImage = nowPost.value.imgUrl;
+    })
+
+    const handleImgInput = (event) => {
+      const nowFile = event.target.files[0];
+      if(nowFile) {
+        post.value.postImage = nowFile;
+        imagePreview.value = URL.createObjectURL(nowFile);
+      }
+    }
+
+    const postModi = async () => {
       if(!post.value.title ||  !post.value.content) {
         alert("입력되지 않은 칸이 있습니다");
       } else {
         const formattedDate = formatDate(new Date());
-        const authStore = useAuthStore();
-        const nowUser = authStore.getNick;
 
-        const numOfPoSts = ref(0);
-        await getDocs(collection(db, "posts")).then((snapshot) => {
-          numOfPoSts.value = snapshot.docs.length;
-        })
+        const docRef = doc(db, "posts", nowPost.value.docid);
+        if(imgUrl.value) {
+          if(nowPost.value.imgUrl) {
+            const storage = getStorage();
+            const imgRef = storageRef(storage, `/images/${nowPost.value.imgUUID}`);
+            await deleteObject(imgRef);
+          }
 
-        if(post.value.postImage) {
           const UUID = self.crypto.randomUUID();
           const file_upload = await(uploadBytes(storageRef(firebaseStorage, `images/${UUID}`), post.value.postImage));
           const file_url = await getDownloadURL(file_upload.ref);
-          await addDoc(collection(db, "posts"), {
-            postid : numOfPoSts.value + 1,
+          await updateDoc(docRef, {
             title : post.value.title,
             content : post.value.content,
-            writer : nowUser,
             imgUrl : file_url,
             imgUUID : UUID,
-            registDate : formattedDate,
             modifyDate : formattedDate,
             fileName : post.value.postImage.name,
-            comments : [],
           });
         } else {
-          await addDoc(collection(db, "posts"), {
-            postid : numOfPoSts.value + 1,
+          await updateDoc(docRef, {
             title : post.value.title,
             content : post.value.content,
-            writer : nowUser,
-            imgUrl : '',
-            imgUUID : '',
-            registDate : formattedDate,
             modifyDate : formattedDate,
-            fileName : '',
-            comments : [],
           });
         }
         
@@ -104,23 +127,10 @@ export default {
       }
     }
 
-    const imgUrl = computed(() => {
-      return imagePreview.value;
-    })
-
-    const handleImgInput = (event) => {
-      const nowFile = event.target.files[0];
-      if(nowFile) {
-        // console.log(nowFile);
-        post.value.postImage = nowFile;
-        imagePreview.value = URL.createObjectURL(nowFile);
-        // console.log(imagePreview.value);
-      }
-    }
-
     return {
       post,
-      postSubmit,
+      postModi,
+      getPost,
       handleImgInput,
       imgUrl,
       formatDate,
@@ -130,7 +140,7 @@ export default {
 }
 </script>
   
-<style>
+<style scoped>
 /* 기본 컨테이너 스타일 */
 .container {
   max-width: 600px;
@@ -188,8 +198,8 @@ export default {
 .submit-btn {
   width: 100%;
   padding: 10px;
-  background-color: #007bff;
-  color: white;
+  background-color: #6C757D;
+  color: #FFFFFF;
   border: none;
   border-radius: 5px;
   font-size: 18px;
@@ -198,6 +208,6 @@ export default {
 }
 
 .submit-btn:hover {
-  background-color: #0056b3;
+  background-color: #007BFF;
 }
 </style>

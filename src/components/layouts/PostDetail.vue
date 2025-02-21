@@ -24,7 +24,7 @@
 
     <div class="commentDiv">
         <h3>댓글 {{ post.comments.length }}</h3>
-        <comment-content :comm="post.comments" @deleteIdx="deleteComment" />
+        <comment-content :comm="post.comments" @deleteIdx="deleteComment" @modify="modifyComm"/>
         
         <div class="newcomment">
             <textarea v-model="newComment" placeholder="댓글을 입력하세요..."></textarea>
@@ -110,12 +110,12 @@ export default {
         }
 
         const deleteComment = async(idx) => {
-            console.log(`In Parent : ${idx}`);
+            // console.log(`In Parent : ${idx}`);
             var commentid = 1;
             const updatedComments = ref([]);
-            console.log(post.value.comments);
+            // console.log(post.value.comments);
             post.value.comments.forEach(comment => {
-                console.log(`${comment.id} -- ${idx}`);
+                // console.log(`${comment.id} -- ${idx}`);
                 if((comment.id - 1) != idx) {
                     const newCom = {
                         id : commentid,
@@ -123,12 +123,13 @@ export default {
                         likes : comment.likes,
                         nickname : comment.nickname,
                         text : comment.text,
+                        modified : false,
                     }
                     updatedComments.value.push(newCom);
                     commentid += 1;
                 }
             });
-            console.log(updatedComments.value);
+            // console.log(updatedComments.value);
             
             const docRef = doc(db, "posts", post.value.docid);
             await updateDoc(docRef, {
@@ -139,10 +140,30 @@ export default {
             })
         }
 
+        const modifyComm = async(comm) => {
+            console.log(comm);
+            const updateComments = ref([]);
+            updateComments.value = [...post.value.comments];
+            updateComments.value[comm.idx].text = comm.com;
+            updateComments.value[comm.idx].date = formatDate(new Date());
+            updateComments.value[comm.idx].modified = true;
+
+            const docRef = doc(db, "posts", post.value.docid);
+            await updateDoc(docRef, {
+                comments : updateComments.value,
+            }).then(() => {
+                post.value.comments = updateComments.value
+                poststore.setPost(post.value);
+            })
+
+            poststore.setPost(post.value);
+        }
+
         return {
             backToPost,
             commentSubmit,
             deleteComment,
+            modifyComm,
             formatDate,
             post,
             newComment,
