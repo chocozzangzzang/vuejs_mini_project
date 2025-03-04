@@ -14,7 +14,7 @@ import { useRouter } from 'vue-router';
 import PostListItem from './layouts/PostListItem.vue';
 import { computed, ref } from 'vue';
 import { db } from '../firebase.js';
-import { doc, getDocs, collection, query, orderBy, deleteDoc, updateDoc, } from 'firebase/firestore';
+import { doc, getDoc, getDocs, collection, query, orderBy, deleteDoc, updateDoc,} from 'firebase/firestore';
 import { onMounted } from 'vue';
 import { postStore } from '@/store/post';
 import { ref as storageRef, deleteObject, getStorage } from 'firebase/storage';
@@ -42,7 +42,7 @@ export default {
             router.push('/postWrite');
         }
 
-        const posts = ref(null);
+        const posts = ref([]);
         const getPosts = computed(() => {
             return posts.value;
         })
@@ -55,21 +55,21 @@ export default {
             await deleteObject(imgRef);
           }
             const updatedPosts = ref([]);
-            var postidx = 1;
-            posts.value.forEach(post => {
-                if((post.postid - 1) != idx) {
-                    post.postid = postidx
-                    postidx += 1;
-                    updatedPosts.value.push(post);
-                }
-            });
+            // var postidx = 1;
+            // posts.value.forEach(post => {
+            //     if((post.value.length - idx) != post.postid) {
+            //         post.postid = postidx
+            //         postidx += 1;
+            //         updatedPosts.value.push(post);
+            //     }
+            // });
             // console.log(updatedPosts.value);
             const docRef = query(collection(db, "posts"), orderBy('registDate', 'desc'));
             const postSnaps = await getDocs(docRef);
             // var updatePostidx = 1;
             var totalLength = postSnaps.docs.length;
             var updateLength = totalLength - 1;
-            // console.log(totalLength, idx); 
+            console.log(totalLength, idx);
             for (const docu of postSnaps.docs) {
                 if((docu.data().postid) == (totalLength - idx)) {
                     await deleteDoc(doc(db, 'posts', docu.id));
@@ -77,6 +77,8 @@ export default {
                     await updateDoc(doc(db, 'posts', docu.id), {
                         postid : updateLength,
                     });
+                    const nowDoc = await getDoc(doc(db, "posts", docu.id));
+                    updatedPosts.value.push(nowDoc.data());
                     updateLength -= 1;
                 }
             }

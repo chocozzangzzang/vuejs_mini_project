@@ -20,6 +20,15 @@
         <div v-if="post.imgUrl" class="preview">
           <img :src="post.imgUrl" alt="imgOfPost" class="preview-img" />
         </div>
+        
+        <div>
+            <button @click="toggleLike" class="likeBtn">
+                <i :class="isLiked ? 'mdi mdi-heart' : 'mdi mdi-heart-outline'"
+                    :style="{color : isLiked ? 'red' : 'gray'}"></i> {{ post.likes.length }}
+                <!-- {{ isLiked ? "❤️ 좋아요 취소" : "🤍 좋아요" }} ({{ post.likes.length }}) -->
+            </button>
+        </div>
+        
     </div>
 
     <div class="commentDiv">
@@ -41,7 +50,7 @@ import { useRouter } from 'vue-router';
 import { db } from '@/firebase';
 import CommentContent from './CommentContent.vue';
 import { computed, ref } from 'vue';
-import { arrayUnion, doc, updateDoc } from 'firebase/firestore';
+import { arrayRemove, arrayUnion, doc, updateDoc } from 'firebase/firestore';
 import { useAuthStore } from '@/store/auth';
 
 export default {
@@ -59,6 +68,7 @@ export default {
         })
 
         const newComment = ref('');
+        const usePostStore = postStore();
 
         const backToPost = () => {
             router.push('/post');
@@ -73,6 +83,29 @@ export default {
                 minute : '2-digit',
             }).format(date);
         };
+
+        const isLiked = computed(() => {
+            const nowUser = authStore.getNick;
+            if(post.value.likes.includes(nowUser)) return true;
+            else return false;
+        })
+
+        const toggleLike = async() => {
+            const nowUser = authStore.getNick;
+            if(isLiked.value) {
+                post.value.likes = post.value.likes.filter((like) => like != nowUser);
+                await updateDoc(doc(db, "posts", post.value.docid), {
+                    likes : arrayRemove(nowUser)
+                });
+                usePostStore.setPost(post.value);
+            } else {
+                post.value.likes.push(nowUser);
+                await updateDoc(doc(db, "posts", post.value.docid), {
+                    likes : arrayUnion(nowUser)
+                });
+                usePostStore.setPost(post.value);
+            }
+        }
 
         const commentSubmit = async() => {
             if(!newComment.value) alert('댓글이 입력되지 않았습니다');
@@ -167,12 +200,19 @@ export default {
             formatDate,
             post,
             newComment,
+            isLiked,
+            toggleLike,
         }
     }
 }
 </script>
 
 <style scoped>
+.likeBtn {
+    width: 100%;
+    text-align: left; /* 버튼을 왼쪽으로 정렬 */
+}
+
 .postHeader {
     align-items: center;
     gap : 10px;
