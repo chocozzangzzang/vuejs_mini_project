@@ -272,43 +272,75 @@ export default {
 
     const getWeather = async (x, y) => {
       try {
-        var xhr = new XMLHttpRequest();
-        var url = 'http://apis.data.go.kr/1360000/VilageFcstInfoService_2.0/getVilageFcst'; /*URL*/
-        var queryParams = '?' + encodeURIComponent('serviceKey') + '='+ process.env.VUE_APP_FORECAST_KEY; /*Service Key*/
-        queryParams += '&' + encodeURIComponent('pageNo') + '=' + encodeURIComponent('1'); /**/
-        queryParams += '&' + encodeURIComponent('numOfRows') + '=' + encodeURIComponent('1000'); /**/
-        queryParams += '&' + encodeURIComponent('dataType') + '=' + encodeURIComponent('JSON'); /**/
-        queryParams += '&' + encodeURIComponent('base_date') + '=' + encodeURIComponent(BaseDate); /**/
-        queryParams += '&' + encodeURIComponent('base_time') + '=' + encodeURIComponent(BaseTime); /**/
-        queryParams += '&' + encodeURIComponent('nx') + '=' + encodeURIComponent(x); /**/
-        queryParams += '&' + encodeURIComponent('ny') + '=' + encodeURIComponent(y); /**/
-        
-        //const data = await response.json();
-        await xhr.open('GET', url + queryParams);
-        xhr.onreadystatechange = function () {
-            if (this.readyState == 4) {
-              const tempVals = JSON.parse(this.response).response.body.items.item.filter(item => item.category === "TMP");
-              // console.log(`output->`, tempVals);
-              tempVals.forEach(f => {
-                values.value.push(f.fcstValue);
-                labels.value.push(f.fcstDate + " " + f.fcstTime);
-              });
-              allDatas.value = {
-                labels : labels.value,
-                datasets : [{
-                  label : 'Temperature',
-                  backgroundColor : '#f87979',
-                  data : values.value,
-                  borderColor : 'red',
-                  tension : 0.4,
-                }],
-              }
-              // console.log(alldata.value.datasets.data);
-              //console.log(`output->`,forecast.value);
-            }
-        };
+        const response = await axios.get(
+          "/.netlify/functions/proxy",
+          {
+            params : {
+              serviceKey : process.env.VUE_APP_FORECAST_KEY,
+              numOfRows : 1000,
+              pageNo : 1,
+              base_date : BaseDate,
+              base_time : BaseTime,
+              nx : x,
+              ny : y,
+            },
+          }
+        );
 
-        xhr.send('');
+        const tempVals = JSON.parse(response).response.body.items.item.filter(it => it.category === "TMP");
+        tempVals.forEach(f => {
+          values.value.push(f.fcstValue);
+          labels.value.push(f.fcstDate + " " + f.fcstTime);
+        });
+        allDatas.value = {
+          labels : labels.value,
+          datasets : [{
+            label : 'Temperature',
+            backgroundColor : '#f87979',
+            data : values.value,
+            borderColor : 'red',
+            tension : 0.4,
+          }],
+        }
+
+        // 기존 http api 호출
+        // var xhr = new XMLHttpRequest();
+        // var url = 'http://apis.data.go.kr/1360000/VilageFcstInfoService_2.0/getVilageFcst'; /*URL*/
+        // var queryParams = '?' + encodeURIComponent('serviceKey') + '='+ process.env.VUE_APP_FORECAST_KEY; /*Service Key*/
+        // queryParams += '&' + encodeURIComponent('pageNo') + '=' + encodeURIComponent('1'); /**/
+        // queryParams += '&' + encodeURIComponent('numOfRows') + '=' + encodeURIComponent('1000'); /**/
+        // queryParams += '&' + encodeURIComponent('dataType') + '=' + encodeURIComponent('JSON'); /**/
+        // queryParams += '&' + encodeURIComponent('base_date') + '=' + encodeURIComponent(BaseDate); /**/
+        // queryParams += '&' + encodeURIComponent('base_time') + '=' + encodeURIComponent(BaseTime); /**/
+        // queryParams += '&' + encodeURIComponent('nx') + '=' + encodeURIComponent(x); /**/
+        // queryParams += '&' + encodeURIComponent('ny') + '=' + encodeURIComponent(y); /**/
+        
+        // //const data = await response.json();
+        // await xhr.open('GET', url + queryParams);
+        // xhr.onreadystatechange = function () {
+        //     if (this.readyState == 4) {
+        //       const tempVals = JSON.parse(this.response).response.body.items.item.filter(item => item.category === "TMP");
+        //       // console.log(`output->`, tempVals);
+        //       tempVals.forEach(f => {
+        //         values.value.push(f.fcstValue);
+        //         labels.value.push(f.fcstDate + " " + f.fcstTime);
+        //       });
+        //       allDatas.value = {
+        //         labels : labels.value,
+        //         datasets : [{
+        //           label : 'Temperature',
+        //           backgroundColor : '#f87979',
+        //           data : values.value,
+        //           borderColor : 'red',
+        //           tension : 0.4,
+        //         }],
+        //       }
+        //       // console.log(alldata.value.datasets.data);
+        //       //console.log(`output->`,forecast.value);
+        //     }
+        // };
+
+        // xhr.send('');
         }
        catch(err) {console.log(err);}
     };
