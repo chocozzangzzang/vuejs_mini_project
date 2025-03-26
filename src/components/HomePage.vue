@@ -276,7 +276,7 @@ export default {
           "/.netlify/functions/proxy",
           {
             params : {
-              serviceKey : process.env.VUE_APP_FORECAST_KEY,
+              serviceKey : process.env.VUE_APP_FORECAST_KEY2,
               numOfRows : 1000,
               pageNo : 1,
               base_date : BaseDate,
@@ -286,8 +286,7 @@ export default {
             },
           }
         );
-
-        const tempVals = JSON.parse(response).response.body.items.item.filter(it => it.category === "TMP");
+        const tempVals = response.data.response.body.items.item.filter(it => it.category === "TMP");
         tempVals.forEach(f => {
           values.value.push(f.fcstValue);
           labels.value.push(f.fcstDate + " " + f.fcstTime);

@@ -1,0 +1,2 @@
+[build]
+  functions = "netlify/functions"  # 함수 디렉토리 경로 설정
